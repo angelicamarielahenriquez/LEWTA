@@ -1,0 +1,37 @@
+LEWTA — QUICK START FOR WINDOWS (SUPABASE + GUEST)
+==================================================
+
+This project supports two modes:
+- SUPABASE ACCOUNT: email/password registration, cloud progress, and account session summaries after setup.
+- CONTINUE AS GUEST: works without Supabase and keeps progress on the current browser/device.
+
+1. Download and extract the LEWTA project ZIP.
+2. Open the extracted folder named LEWTA_Platform.
+3. To configure Supabase, follow SUPABASE_SETUP_GUIDE.md. Copy .env.example to .env.local and enter your Project URL and Publishable key.
+4. In your Supabase SQL Editor, run the full supabase/schema.sql file.
+5. Double-click start-dev.bat.
+6. On first run, dependency installation needs an internet connection.
+7. Open http://localhost:3000 in Chrome or Edge.
+8. Keep the terminal open while using the site. Press Ctrl+C to stop it.
+
+If Windows blocks the start script, open CMD in the LEWTA_Platform folder and run:
+   npm.cmd install
+   npm.cmd run dev
+
+Continue as Guest does not use Supabase. Enter first and last name and start playing. Guest progress and activity records are local to this browser/device and do not sync to another device.
+
+ACCOUNT SIGNUP
+--------------
+When NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY are configured, Create Account and Log In use Supabase Auth. Students register with an email address and password. If email confirmation is enabled, they need to confirm their email before logging in.
+
+TEACHER DASHBOARD
+-----------------
+To protect the dashboard, configure TEACHER_DASHBOARD_PASSWORD and TEACHER_DASHBOARD_SECRET (32+ random characters) in your local .env.local and Vercel environment variables.
+To load cloud student data across devices, also set SUPABASE_SECRET_KEY as a server-only variable. Never use the NEXT_PUBLIC_ prefix for this secret.
+Guest records remain local; the teacher dashboard can only show guest records stored in the same browser.
+
+PUBLISH AN UPDATED VERSION
+--------------------------
+After testing, run this from the LEWTA_Platform folder:
+   npx.cmd vercel --prod
+This republishes to your existing Vercel project if the folder is already linked. Do not create a second project.

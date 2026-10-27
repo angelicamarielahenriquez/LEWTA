@@ -1,0 +1,15 @@
+node_modules/
+.next/
+out/
+build/
+coverage/
+*.log
+.DS_Store
+.env*
+!.env.example
+
+# Local Vercel project link/configuration
+.vercel/
+
+.vercel
+.env*

@@ -1,0 +1,93 @@
+# LEWTA + Supabase setup guide
+
+LEWTA now supports two separate entry paths:
+
+- **Create Account / Log In:** Supabase Auth (email + password) and progress stored in the Supabase database.
+- **Continue as Guest:** no login required. Guest profile, game progress, and activity stay in the current browser on that device and the guest gameplay path never uploads that data. When Supabase is configured, the app can check for a previously signed-in account on startup, but guest play does not depend on those credentials.
+
+Account registration is intentionally disabled until the public project URL and publishable key are provided. Guest mode does not depend on either variable and remains usable when Supabase is unconfigured or unavailable.
+
+## 1. Create the Supabase database tables
+
+1. Open your Supabase project.
+2. Open **SQL Editor** and create a new query.
+3. Open `supabase/schema.sql` from this project, copy the entire file into the SQL Editor, and run it.
+4. The schema creates `profiles`, `player_progress`, and `student_sessions`, an account-profile trigger, and row-level security (RLS) policies. It also backfills existing Supabase Auth users into `profiles`.
+5. Verify the three tables exist in **Table Editor**.
+
+Run the SQL in the same Supabase project that will be used by LEWTA. Do not disable RLS on these tables.
+
+## 2. Copy the public Supabase settings
+
+In Supabase, locate your project's **Project URL** and **Publishable key** (older projects may show an `anon` key).
+
+1. Copy `.env.example` to `.env.local` in the `LEWTA_Platform` project root.
+2. Set these two values in `.env.local`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_your_public_key
+```
+
+Use the exact URL and publishable/anon key from your project. A publishable/anon key is intended to be used in browser applications; row-level security policies protect the data. Never put a Supabase secret or service-role key in a `NEXT_PUBLIC_` variable.
+
+## 3. Test locally
+
+From a terminal opened in the `LEWTA_Platform` folder, run:
+
+```bat
+npm.cmd install
+npm.cmd run dev
+```
+
+Open `http://localhost:3000`.
+
+1. **Continue as Guest** should work whether or not Supabase is configured. Guest progress stays on that browser/device.
+2. **Create Account** requests first name, last name, username, promotion, email, and password.
+3. If email confirmation is enabled in Supabase, the student must click the confirmation email before logging in. The app displays a reminder. If auto-confirm is enabled, signup may create a session immediately.
+4. Log out and log back in with the email and password to check that progress comes back from `player_progress`.
+
+In Supabase **Authentication → URL Configuration**, make sure the Site URL and Redirect URLs permit both local testing and the published site. Suggested URLs are `http://localhost:3000/**` and `https://lewtaplatformlocal.vercel.app/**`. Use your actual production domain if different.
+
+## 4. Configure Vercel
+
+In Vercel, open the existing LEWTA project → **Settings → Environment Variables**. Add the following for Production (and Preview/Development if you use those environments):
+
+- `NEXT_PUBLIC_SUPABASE_URL` — Project URL.
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — publishable key (or use `NEXT_PUBLIC_SUPABASE_ANON_KEY` for an older key, which this app also accepts).
+- `TEACHER_DASHBOARD_PASSWORD` — a strong, unique password for the teacher dashboard.
+- `TEACHER_DASHBOARD_SECRET` — a separate random secret with at least 32 characters.
+- `SUPABASE_SECRET_KEY` — **server-only** Supabase secret key. For older projects you can use `SUPABASE_SERVICE_ROLE_KEY` instead.
+
+`SUPABASE_SECRET_KEY` is used only by the password-protected `/api/teacher-data` server route so the teacher dashboard can retrieve all authenticated students' progress. It must not have the `NEXT_PUBLIC_` prefix and must never be copied into frontend code, client-side environment variables, or shared screenshots. If you do not set it, account authentication and cloud progress may work, but the teacher dashboard can only show records available locally.
+
+After saving environment variables, redeploy the project. Next.js public environment variables are embedded when the app is built, so adding them without a new deployment will not activate the account buttons on the live page.
+
+## 5. What gets saved where?
+
+| Feature | Supabase configured | Supabase not configured |
+|---|---|---|
+| Create Account / Log In | Enabled; email/password managed by Supabase Auth | Disabled with setup guidance |
+| Progress, XP, gems, streak, unlocks | Saved to `player_progress` for the account | Existing guest/legacy local data stays in browser storage |
+| Student session summaries | Saved to `student_sessions` for authenticated accounts | Local browser only |
+| Continue as Guest | Always available; guest data remains local | Always available; no credentials needed |
+| Guest progress/session logs | Local browser/device only | Local browser/device only |
+| Teacher cross-device account report | Requires teacher password settings and server-only Supabase secret key | Not available; local records only |
+
+Guest data intentionally does not upload to Supabase. This guarantees that a guest can continue playing even if Supabase is not configured, but guest progress and guest records do not synchronize across devices.
+
+## 6. Security notes
+
+- Auth passwords are handled by Supabase Auth; LEWTA no longer stores a locally computed password hash for new account signups.
+- The browser receives only the Supabase publishable/anon key.
+- RLS policies limit profile, progress, and session access to the signed-in user.
+- The teacher data endpoint checks the existing server-side teacher password session before using the server-only Supabase secret key.
+- Do not share the contents of `.env.local`; it is git-ignored.
+
+## Troubleshooting
+
+- **Account button says Supabase setup pending:** one or both public environment variables are missing or the site has not been redeployed since adding them.
+- **Sign-up works but profile/progress tables are missing:** run the complete `supabase/schema.sql` in the correct Supabase project.
+- **Confirmation email never arrives:** review Supabase Authentication email settings, confirmations, SMTP configuration, and redirect URL configuration.
+- **Progress does not sync:** check the browser console, Vercel deployment logs, the project's Supabase URL/key, and that the SQL schema has been applied.
+- **Teacher dashboard lists only local guest sessions:** set `SUPABASE_SECRET_KEY` server-side and make sure teacher password configuration is valid, then redeploy.

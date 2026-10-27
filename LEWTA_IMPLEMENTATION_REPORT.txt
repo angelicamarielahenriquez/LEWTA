@@ -1,0 +1,53 @@
+LEWTA PLATFORM — SUPABASE + GUEST IMPLEMENTATION REPORT
+========================================================
+
+Scope
+-----
+Targeted update of the existing Next.js LEWTA application. The app retains its existing 12 destination progression, five missions per city, rewards, passport, profile, review mechanics, audio, and navigation. No Supabase project credentials were supplied, so the cloud mode is prepared but not connected to a live project in this deliverable.
+
+Implemented
+-----------
+- Added a hybrid authentication/data path: Create Account and Log In use Supabase Auth when the public project URL and publishable/anon key are configured; Continue as Guest remains available without Supabase configuration or login.
+- Guest sessions use localStorage only and do not write to Supabase. Guest identity, progress and session records stay on that browser/device.
+- Supabase student accounts load/save progress to the player_progress table and write session summaries to student_sessions. RLS policies bind browser reads/writes to auth.uid().
+- Added supabase/schema.sql with profiles, player_progress, student_sessions, a student-profile trigger, backfill for existing auth users and RLS policies.
+- Added an authenticated server-only Teacher Dashboard data endpoint. It checks the signed, HttpOnly teacher session before accessing class-wide data with SUPABASE_SECRET_KEY (or the legacy SUPABASE_SERVICE_ROLE_KEY). That secret is never placed in browser code.
+- Tightened startup fallback so a cached cloud-account profile cannot masquerade as an authenticated Supabase session when Supabase is not configured. Local Guest and prior legacy-local sessions can still resume.
+- Integrated the supplied transparent image assets into the existing paths: main LEWTA branding, Business City logo, learning-area tiles, navigation icons, mission states, teacher portrait, destination airplane and country-specific alien images.
+- Applied Poppins for primary titles/city/country headings, Inter for body/input text, Nunito for selected UI labels, and Montserrat for the teacher motto.
+- Context Match has no countdown timer and uses typed complete answers. Validation trims outer space, normalizes case and collapses repeated whitespace; it rejects answer letters and incomplete phrases. Timers in other games remain unchanged.
+- New York Business City Boss includes the ten supplied Business English questions plus the additional stress item in the existing 80-question round, with expected answers and purpose-written choices.
+- Guest entry requires first and last name. Local activity records include session identity and game events; account session summaries sync to Supabase when configured.
+- Teacher test mode continues to suppress student reward/progress updates.
+- Added SUPABASE_SETUP_GUIDE.md and updated README / Windows quick-start instructions.
+
+Configuration still required
+----------------------------
+1. Run supabase/schema.sql in the correct Supabase project's SQL Editor.
+2. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY) in .env.local for local testing and in Vercel's Environment Variables for production. Create Account / Log In remain intentionally disabled until both public variables are present in the build.
+3. Configure Supabase Authentication email confirmation and allowed redirect URLs as documented in SUPABASE_SETUP_GUIDE.md.
+4. Set TEACHER_DASHBOARD_PASSWORD and a unique TEACHER_DASHBOARD_SECRET of at least 32 characters on the server.
+5. To enable cloud student data in Teacher Dashboard, set SUPABASE_SECRET_KEY (server-only) or the legacy SUPABASE_SERVICE_ROLE_KEY in Vercel. Never expose it through a NEXT_PUBLIC_ variable.
+6. Redeploy LEWTA after adding environment variables.
+
+Explicit limitations
+--------------------
+- Supabase is not connected to the user's actual project in this ZIP: no project URL or keys were provided, and no live signup/login/database test could be run.
+- Guest progress and Guest activity remain local to one browser/device by design and do not sync across devices or appear on another device's Teacher Dashboard.
+- Cloud account and teacher cross-device reporting need the SQL schema and the correct environment variables to be configured before they work online.
+- Teacher authentication uses the configured shared teacher-password endpoint rather than Supabase Auth for a teacher account. Do not use a weak or reused password; a future role-based teacher identity flow would be stronger for multi-teacher environments.
+- A full production Next.js build was not verified in this environment because package installation timed out while trying to obtain dependencies. Run npm.cmd install and npm.cmd run build locally before treating the ZIP as production-tested.
+
+Validation performed
+--------------------
+- TypeScript/TSX syntax-transpilation: 11 source files checked, 0 syntax diagnostics. This is a syntax check, not a full typecheck/build.
+- JSON parsing: package.json, cities.json, cityDecks.json, pairs.json and extraPairs.json all parsed successfully.
+- Data bank: 12 city decks, exactly 80 pairs per city (960 total).
+- Static source references: 36 literal image/audio asset paths checked, 0 missing files. Dynamic image paths were reviewed in code but cannot all be verified by a static literal scan.
+- Required files present: Supabase browser client, SQL schema, teacher-data API, teacher-auth API, environment template and setup guide.
+- The provided teacher password is not hardcoded; secrets are environment-only placeholders.
+- Full production Next.js build/typecheck was not verified because dependency installation timed out while trying to obtain packages. Run `npm.cmd install` and `npm.cmd run build` locally before production release.
+
+Deployment reminder
+-------------------
+The ZIP intentionally excludes .env.local, account secrets, and the account-specific .vercel folder. To update the existing production project, transfer the new files into the already-linked local LEWTA_Platform project (preserve its .vercel folder), configure Supabase/teacher environment variables in Vercel, test locally, then run npx.cmd vercel --prod. Do not create a second Vercel project.
