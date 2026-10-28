@@ -79,6 +79,7 @@ export type LewtaApi = {
   toggleMusic: () => void;
   // teacher
   openTeacherDashboard: () => void;
+  teacherLogin: (password: string) => void;
   teacherLogout: () => void;
   reloadTeacherRows: () => void;
   startTeacherTest: (cityId: string) => void;

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkTeacher, teacherEmails } from "@/lib/server/teacherAccess";
+import { TEACHER_COOKIE, validTeacherToken } from "@/lib/server/teacherSession";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows come from Supabase JSON columns */
 
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
   // Every request is re-checked: only the verified teacher account can read class data.
   const check = await checkTeacher(request.headers.get("authorization"));
   if (!check.ok) return json({ configured: check.configured, error: check.error }, check.status);
+  if (!validTeacherToken(request.cookies.get(TEACHER_COOKIE)?.value, check.userId)) return json({ configured: true, error: "Enter the teacher password to open the dashboard." }, 401);
   const admin = check.admin;
   if (!admin) return json({ configured: false, error: "Teacher Mode works, but the class list needs a valid SUPABASE_SECRET_KEY in Vercel." }, 503);
   const hidden = new Set(teacherEmails());

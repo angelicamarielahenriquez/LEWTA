@@ -8,22 +8,31 @@ import type { TeacherRow } from "@/lib/teacher";
 
 const CODES = ["US", "PA", "GB", "JP", "FR", "MX", "AE", "SG", "IE", "JM", "ES", "BR"];
 
-/** V10 private teacher area. Access is granted by the server to the teacher's own account — there is no shared password. */
+/** V10 private teacher area: the teacher's own account + the dashboard password (both checked on the server). */
 export function TeacherLoginScreen() {
-  const { player, teacherAccessConfigured, teacherAuthError, navigate, go, openTeacherDashboard } = useLewta();
+  const { player, teacherLogin, teacherAccessConfigured, teacherAuthError, navigate, go } = useLewta();
+  const [password, setPassword] = useState("");
   const signedIn = player?.storageMode === "supabase";
-  return <div className="teacher-login">
+  if (!signedIn) return <div className="teacher-login">
     <div className="teacher-avatar"><Image src={IMAGES.navigation.teacherDashboard} alt="Teacher Angélica" width={88} height={88} /></div>
     <small>PRIVATE TEACHER AREA</small>
     <h2>Teacher Dashboard</h2>
-    {!signedIn ? <p>Log in with your teacher account to review student progress and test every destination.</p>
-      : <p>This area is only available to the teacher account. You are signed in as <b>{player?.email || player?.username}</b>, which is a student account.</p>}
-    {!teacherAccessConfigured && <p className="auth-error">Teacher access is not configured on this server yet.</p>}
-    {teacherAuthError && <p className="auth-error" role="alert">{teacherAuthError}</p>}
-    {!signedIn ? <button className="pink-action" onClick={() => go("login")}>Log in with teacher account →</button>
-      : <button className="pink-action" onClick={openTeacherDashboard}>Check my access again ↻</button>}
+    <p>Log in with your teacher account first. Then enter your teacher password here.</p>
+    <button className="pink-action" onClick={() => go("login")}>Log in with teacher account →</button>
     <button type="button" onClick={() => navigate("learn")}>‹ Back to LEWTA</button>
   </div>;
+  return <form className="teacher-login" onSubmit={(e) => { e.preventDefault(); teacherLogin(password); setPassword(""); }}>
+    <div className="teacher-avatar"><Image src={IMAGES.navigation.teacherDashboard} alt="Teacher Angélica" width={88} height={88} /></div>
+    <small>PRIVATE TEACHER AREA</small>
+    <h2>Teacher Dashboard</h2>
+    <p>Enter your teacher password to review student progress and test every destination.</p>
+    {!teacherAccessConfigured && <p className="auth-error">Teacher access is not configured on this server yet.</p>}
+    {teacherAuthError && <p className="auth-error" role="alert">{teacherAuthError}</p>}
+    <label htmlFor="teacher-password">Teacher password</label>
+    <input type="password" id="teacher-password" autoComplete="current-password" placeholder="Enter teacher password" value={password} onChange={(e) => setPassword(e.target.value)} />
+    <button className="pink-action" disabled={!password.trim()}>Unlock Teacher Dashboard →</button>
+    <button type="button" onClick={() => navigate("learn")}>‹ Back to LEWTA</button>
+  </form>;
 }
 
 export function TeacherScreen() {
@@ -36,7 +45,7 @@ export function TeacherScreen() {
   return <>
     <h1 className="section-title">Class <span style={{ color: "#ff48a7" }}>Progress</span></h1>
     <p className="sub">Review student performance and test all 12 destinations without changing learner progress.</p>
-    <button className="btn ghost" onClick={teacherLogout}>← Back to LEWTA</button> <button className="btn ghost" onClick={reloadTeacherRows}>↻ Refresh</button>
+    <button className="btn ghost" onClick={teacherLogout}>🔒 Lock Dashboard</button> <button className="btn ghost" onClick={reloadTeacherRows}>↻ Refresh</button>
     <div className="teacher-stats">
       <div>👥 <b>{teacherRows.length}</b><small>Students</small></div>
       <div>⭐ <b>{teacherRows.reduce((n, r) => n + (Number(r.xp) || 0), 0).toLocaleString()}</b><small>Total XP</small></div>

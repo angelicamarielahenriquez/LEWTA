@@ -57,7 +57,8 @@ In Vercel, open the existing LEWTA project → **Settings → Environment Variab
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — publishable key (or use `NEXT_PUBLIC_SUPABASE_ANON_KEY` for an older key, which this app also accepts).
 - `TEACHER_EMAILS` — the e-mail address of the teacher's LEWTA account (several can be separated by commas). Only a signed-in account with this **verified** e-mail gets Teacher Mode and the Teacher Dashboard. Alternatively set `role = 'teacher'` on that account's row in `profiles` (students cannot change this column).
 - `SUPABASE_SECRET_KEY` — server-only key used to check the teacher and read class data. Never prefix it with `NEXT_PUBLIC_`.
-- `TEACHER_DASHBOARD_PASSWORD` / `TEACHER_DASHBOARD_SECRET` are no longer used (the shared password was replaced by the teacher account) and can be deleted.
+- `TEACHER_DASHBOARD_PASSWORD` — the Teacher Dashboard password. Teacher Mode needs BOTH the teacher account and this password; without the password the teacher's account plays with normal progressive unlocking.
+- `TEACHER_DASHBOARD_SECRET` — optional extra random text used to sign the 6-hour teacher session cookie.
 - `SUPABASE_SECRET_KEY` — **server-only** Supabase secret key. For older projects you can use `SUPABASE_SERVICE_ROLE_KEY` instead.
 
 `SUPABASE_SECRET_KEY` is used only by the password-protected `/api/teacher-data` server route so the teacher dashboard can retrieve all authenticated students' progress. It must not have the `NEXT_PUBLIC_` prefix and must never be copied into frontend code, client-side environment variables, or shared screenshots. If you do not set it, account authentication and cloud progress may work, but the teacher dashboard can only show records available locally.

@@ -307,6 +307,7 @@ export default function Home() {
   async function logout() {
     recordStudentActivity(player, "session-end", {}, progressRef.current);
     await flushCloudSave();
+    if (teacherAuthorized) { try { await fetch("/api/teacher-auth", { method: "DELETE" }); } catch { /* ignore */ } }
     if (player?.storageMode === "supabase" && supabase) {
       const { error } = await supabase.auth.signOut();
       if (error) console.warn("Supabase sign-out failed:", error.message);
@@ -578,6 +579,7 @@ export default function Home() {
       setTeacherAuthorized(isTeacher);
       if (!isTeacher && result.error) setTeacherAuthError(String(result.error));
       if (isTeacher && announce) showNotice("Teacher Mode is on: all 12 cities and 60 missions are open for testing. Nothing you do here changes student progress.");
+      // Without the password step the teacher's account plays like any student (progressive unlocking).
       return isTeacher;
     } catch { setTeacherAuthorized(false); setTeacherAuthError("Could not contact the teacher access service."); return false; }
   }, [player?.storageMode, showNotice]);
@@ -592,7 +594,24 @@ export default function Home() {
     if (ok) { setPage("teacher"); await reloadTeacherRows(); }
     else setPage("teacher-login");
   }
-  function teacherLogout() { setPage(player ? "hub" : "welcome"); }
+  async function teacherLogin(password: string) {
+    setTeacherAuthError("");
+    try {
+      const token = await accessToken();
+      if (!token) { setTeacherAuthError("Log in with your teacher account first."); return; }
+      const r = await fetch("/api/teacher-auth", { method: "POST", cache: "no-store", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ password }) });
+      const result = await r.json().catch(() => ({}));
+      setTeacherAccessConfigured(result.configured !== false);
+      if (!r.ok || result.teacher !== true) { setTeacherAuthorized(false); setTeacherAuthError(String(result.error || "Teacher authentication failed.")); return; }
+      setTeacherAuthorized(true); setPage("teacher"); await reloadTeacherRows();
+      showNotice("Teacher Mode is on: all 12 cities, 60 missions, aliens, stamps and songs are open for testing. Nothing you do here is saved.");
+    } catch { setTeacherAuthError("Could not contact the teacher sign-in service."); }
+  }
+  async function teacherLogout() {
+    try { await fetch("/api/teacher-auth", { method: "DELETE" }); } catch { /* ignore */ }
+    setTeacherAuthorized(false); setTeacherRows([]); setGame(null); stopMusic(); setPage(player ? "hub" : "welcome");
+    showNotice("Teacher Dashboard locked. Your account is back to normal progress.");
+  }
   function startTeacherTest(cityId: string) { if (!teacherAuthorized) return; setActiveCityId(cityId); setGame(null); setGameResult(null); setPage("city"); playCityMusic(cityId); }
   function exitTeacherTest() { stopMusic(); setPage("teacher"); void reloadTeacherRows(); }
 
@@ -618,7 +637,7 @@ export default function Home() {
     setAudio, playEffect, musicTrack,
     chooseTrack: (track) => { if (track === "lewta" || progress.unlockedCities.includes(track) || teacherPreviewMode) { if (audio.muted) setAudio({ muted: false }); playTrack(track); } },
     toggleMusic: () => { if (musicTrack) stopMusic(); else { if (audio.muted) setAudio({ muted: false }); playTrack(lastTrack.current || "lewta"); } },
-    openTeacherDashboard: () => void openTeacherDashboard(), teacherLogout,
+    openTeacherDashboard: () => void openTeacherDashboard(), teacherLogin: (p) => void teacherLogin(p), teacherLogout: () => void teacherLogout(),
     reloadTeacherRows: () => void reloadTeacherRows(), startTeacherTest, exitTeacherTest,
   };
   return <LewtaContext.Provider value={api}><AppShell notice={notice} onCloseNotice={() => setNotice("")} /></LewtaContext.Provider>;
