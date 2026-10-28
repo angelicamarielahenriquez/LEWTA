@@ -1,0 +1,501 @@
+﻿ID,Category,Word_or_Phrase_A,Synonym_or_Contextual_Equivalent_B,Spanish_Meaning
+1,Business actions,purchase,buy,comprar
+2,Business actions,obtain,get,obtener
+3,Business actions,provide,supply,proporcionar
+4,Business actions,deliver,bring,entregar
+5,Business actions,request,ask for,solicitar
+6,Business actions,require,need,requerir
+7,Business actions,assist,help,ayudar
+8,Business actions,inform,notify,informar
+9,Business actions,announce,make public,anunciar
+10,Business actions,confirm,verify,confirmar
+11,Business actions,cancel,call off,cancelar
+12,Business actions,postpone,put off,posponer
+13,Business actions,reschedule,schedule again,reprogramar
+14,Business actions,arrange,organize,organizar
+15,Business actions,complete,finish,completar
+16,Business actions,begin,start,comenzar
+17,Business actions,terminate,end,terminar
+18,Business actions,continue,carry on,continuar
+19,Business actions,select,choose,seleccionar
+20,Business actions,establish,set up,establecer
+21,Business actions,maintain,keep in good condition,mantener
+22,Business actions,repair,fix,reparar
+23,Business actions,replace,substitute,reemplazar
+24,Business actions,reduce,decrease,reducir
+25,Business actions,increase,raise,aumentar
+26,Communication,contact,get in touch with,contactar
+27,Communication,reply,respond,responder
+28,Communication,inquire,ask,consultar
+29,Communication,explain,clarify,explicar
+30,Communication,discuss,talk about,discutir / hablar de
+31,Communication,mention,refer to,mencionar
+32,Communication,state,say,declarar
+33,Communication,announce,declare publicly,anunciar
+34,Communication,recommend,suggest,recomendar
+35,Communication,propose,suggest,proponer
+36,Communication,request information,ask for details,solicitar información
+37,Communication,notify someone,inform someone,notificar a alguien
+38,Communication,apologize,say you are sorry,disculparse
+39,Communication,complain,express dissatisfaction,quejarse
+40,Communication,promise,make a commitment,prometer
+41,Communication,invite,ask someone to attend,invitar
+42,Communication,remind,help someone remember,recordar
+43,Communication,persuade,convince,persuadir
+44,Communication,emphasize,stress,enfatizar
+45,Communication,describe,give details about,describir
+46,Communication,summarize,give a brief overview,resumir
+47,Communication,distribute information,circulate information,distribuir información
+48,Communication,forward an email,send an email on,reenviar un correo
+49,Communication,disclose,reveal,revelar
+50,Communication,reply promptly,respond quickly,responder rápidamente
+51,Meetings and planning,meeting,conference,reunión
+52,Meetings and planning,agenda,meeting plan,agenda
+53,Meetings and planning,attend,be present at,asistir
+54,Meetings and planning,participate,take part,participar
+55,Meetings and planning,chair a meeting,lead a meeting,presidir una reunión
+56,Meetings and planning,minutes,meeting record,acta de reunión
+57,Meetings and planning,schedule a meeting,arrange a meeting,programar una reunión
+58,Meetings and planning,call a meeting,convene a meeting,convocar una reunión
+59,Meetings and planning,put on the agenda,list for discussion,incluir en la agenda
+60,Meetings and planning,reach an agreement,come to an agreement,llegar a un acuerdo
+61,Meetings and planning,make a decision,decide,tomar una decisión
+62,Meetings and planning,discuss an issue,talk over a matter,tratar un asunto
+63,Meetings and planning,raise a concern,bring up a concern,plantear una inquietud
+64,Meetings and planning,follow up,check back,dar seguimiento
+65,Meetings and planning,action item,assigned task,tarea asignada
+66,Meetings and planning,deadline,due date,fecha límite
+67,Meetings and planning,plan ahead,prepare in advance,planificar con anticipación
+68,Meetings and planning,review a proposal,examine a proposal,revisar una propuesta
+69,Meetings and planning,approve a plan,authorize a plan,aprobar un plan
+70,Meetings and planning,reject a proposal,turn down a proposal,rechazar una propuesta
+71,Meetings and planning,postpone a meeting,delay a meeting,posponer una reunión
+72,Meetings and planning,conference room,meeting room,sala de reuniones
+73,Meetings and planning,video conference,online meeting,videoconferencia
+74,Meetings and planning,take notes,write down key points,tomar apuntes
+75,Meetings and planning,wrap up a meeting,bring a meeting to a close,concluir una reunión
+76,Time and scheduling,on time,punctually,a tiempo
+77,Time and scheduling,in advance,ahead of time,con anticipación
+78,Time and scheduling,at the latest,no later than,a más tardar
+79,Time and scheduling,temporarily,for a short time,temporalmente
+80,Time and scheduling,currently,at present,actualmente
+81,Time and scheduling,eventually,in the end,finalmente
+82,Time and scheduling,immediately,right away,inmediatamente
+83,Time and scheduling,promptly,without delay,rápidamente
+84,Time and scheduling,frequently,often,frecuentemente
+85,Time and scheduling,occasionally,from time to time,ocasionalmente
+86,Time and scheduling,annually,every year,anualmente
+87,Time and scheduling,monthly,every month,mensualmente
+88,Time and scheduling,weekly,every week,semanalmente
+89,Time and scheduling,daily,every day,diariamente
+90,Time and scheduling,prior to,before,antes de
+91,Time and scheduling,following,after,después de
+92,Time and scheduling,during,throughout the period of,durante
+93,Time and scheduling,postpone until Friday,put off until Friday,posponer hasta el viernes
+94,Time and scheduling,be due,be expected by a date,vencer / tener fecha límite
+95,Time and scheduling,expire,come to an end,expirar / vencer
+96,Time and scheduling,extend a deadline,give more time,ampliar una fecha límite
+97,Time and scheduling,available soon,available shortly,disponible pronto
+98,Time and scheduling,in the meantime,meanwhile,mientras tanto
+99,Time and scheduling,from now on,starting now,de ahora en adelante
+100,Time and scheduling,ahead of schedule,earlier than planned,antes de lo previsto
+101,Employment and hiring,employee,staff member,empleado
+102,Employment and hiring,employer,company that hires people,empleador
+103,Employment and hiring,applicant,candidate,solicitante / candidato
+104,Employment and hiring,recruit,hire,contratar
+105,Employment and hiring,vacancy,open position,vacante
+106,Employment and hiring,job opening,available position,puesto disponible
+107,Employment and hiring,resumé,CV,currículum
+108,Employment and hiring,qualifications,credentials,cualificaciones
+109,Employment and hiring,experience,work background,experiencia
+110,Employment and hiring,salary,pay,salario
+111,Employment and hiring,wages,earnings,salarios
+112,Employment and hiring,benefits,employee perks,beneficios laborales
+113,Employment and hiring,promotion,advancement,ascenso
+114,Employment and hiring,retire,leave employment at retirement age,jubilarse
+115,Employment and hiring,resign,quit a job formally,renunciar
+116,Employment and hiring,dismiss,fire,despedir
+117,Employment and hiring,lay off,make redundant,despedir por falta de trabajo
+118,Employment and hiring,supervisor,manager,supervisor
+119,Employment and hiring,colleague,coworker,compañero de trabajo
+120,Employment and hiring,training session,instructional session,sesión de capacitación
+121,Employment and hiring,orientation,introductory training,orientación inicial
+122,Employment and hiring,workload,amount of work,carga laboral
+123,Employment and hiring,full-time,working a full schedule,tiempo completo
+124,Employment and hiring,part-time,working fewer hours,medio tiempo
+125,Employment and hiring,eligible,qualified to receive or do something,elegible / que cumple requisitos
+126,Travel and hospitality,accommodation,lodging,alojamiento
+127,Travel and hospitality,reservation,booking,reserva
+128,Travel and hospitality,itinerary,travel schedule,itinerario
+129,Travel and hospitality,departure,leaving,salida
+130,Travel and hospitality,arrival,coming in,llegada
+131,Travel and hospitality,destination,place of arrival,destino
+132,Travel and hospitality,fare,ticket price,tarifa
+133,Travel and hospitality,round trip,return trip,viaje de ida y vuelta
+134,Travel and hospitality,boarding pass,boarding card,tarjeta de embarque
+135,Travel and hospitality,luggage,baggage,equipaje
+136,Travel and hospitality,carry-on bag,hand luggage,equipaje de mano
+137,Travel and hospitality,vacant room,available room,habitación disponible
+138,Travel and hospitality,fully booked,no rooms available,completo / sin disponibilidad
+139,Travel and hospitality,check in,register on arrival,registrarse al llegar
+140,Travel and hospitality,check out,leave a hotel and settle the bill,registrarse al salir
+141,Travel and hospitality,complimentary,free of charge,gratuito
+142,Travel and hospitality,amenities,facilities,servicios / comodidades
+143,Travel and hospitality,concierge,guest services desk,conserjería
+144,Travel and hospitality,shuttle,transfer service,transporte de enlace
+145,Travel and hospitality,postpone a flight,delay a flight,retrasar un vuelo
+146,Travel and hospitality,connecting flight,transfer flight,vuelo de conexión
+147,Travel and hospitality,car rental,vehicle hire,alquiler de automóvil
+148,Travel and hospitality,travel expenses,trip costs,gastos de viaje
+149,Travel and hospitality,tour guide,guide,guía turístico
+150,Travel and hospitality,scenic route,picturesque route,ruta panorámica
+151,Sales and marketing,advertise,promote,anunciar / promocionar
+152,Sales and marketing,promotion,special offer,promoción
+153,Sales and marketing,discount,price reduction,descuento
+154,Sales and marketing,refund,money returned,reembolso
+155,Sales and marketing,customer,client,cliente
+156,Sales and marketing,consumer,buyer,consumidor
+157,Sales and marketing,retailer,seller to the public,minorista
+158,Sales and marketing,wholesaler,bulk distributor,mayorista
+159,Sales and marketing,merchandise,goods for sale,mercancía
+160,Sales and marketing,product launch,product introduction,lanzamiento de producto
+161,Sales and marketing,campaign,planned promotional effort,campaña
+162,Sales and marketing,target market,intended customers,mercado objetivo
+163,Sales and marketing,brand awareness,brand recognition,reconocimiento de marca
+164,Sales and marketing,sales figures,sales numbers,cifras de ventas
+165,Sales and marketing,revenue,income from sales or services,ingresos
+166,Sales and marketing,profit,financial gain,ganancia
+167,Sales and marketing,browse,look through items,examinar productos
+168,Sales and marketing,purchase online,buy online,comprar en línea
+169,Sales and marketing,out of stock,unavailable for purchase,agotado
+170,Sales and marketing,in stock,available for purchase,en existencia
+171,Sales and marketing,bestseller,top-selling item,superventas
+172,Sales and marketing,place an order,submit an order,hacer un pedido
+173,Sales and marketing,order form,purchase form,formulario de pedido
+174,Sales and marketing,price list,list of prices,lista de precios
+175,Sales and marketing,market research,consumer research,investigación de mercado
+176,Finance and budgets,cost,expense,costo
+177,Finance and budgets,fee,charge,tarifa / cargo
+178,Finance and budgets,invoice,bill,factura
+179,Finance and budgets,receipt,proof of purchase,recibo
+180,Finance and budgets,estimate,cost projection,estimación
+181,Finance and budgets,quotation,price quote,cotización
+182,Finance and budgets,budget,spending plan,presupuesto
+183,Finance and budgets,funds,money available,fondos
+184,Finance and budgets,allocate funds,assign money,asignar fondos
+185,Finance and budgets,reimburse,pay back expenses,reembolsar
+186,Finance and budgets,affordable,reasonably priced,asequible
+187,Finance and budgets,overpriced,too expensive,demasiado caro
+188,Finance and budgets,waive a fee,remove a charge,eximir de un cargo
+189,Finance and budgets,payment due,payment required by a date,pago pendiente / con vencimiento
+190,Finance and budgets,outstanding balance,unpaid amount,saldo pendiente
+191,Finance and budgets,installment,partial payment,cuota
+192,Finance and budgets,deposit,initial payment,depósito
+193,Finance and budgets,withdraw,take money out,retirar dinero
+194,Finance and budgets,deposit funds,put money into an account,depositar fondos
+195,Finance and budgets,savings,money set aside,ahorros
+196,Finance and budgets,expenditure,spending,gasto
+197,Finance and budgets,income,money received,ingreso
+198,Finance and budgets,financial statement,financial report,estado financiero
+199,Finance and budgets,audit,financial examination,auditoría
+200,Finance and budgets,break even,cover all costs without profit or loss,alcanzar el punto de equilibrio
+201,Customer service,assist a customer,help a customer,ayudar a un cliente
+202,Customer service,resolve an issue,solve a problem,resolver un problema
+203,Customer service,handle a complaint,deal with a complaint,gestionar una queja
+204,Customer service,customer satisfaction,customer happiness,satisfacción del cliente
+205,Customer service,inquiry,question,consulta
+206,Customer service,feedback,comments or reactions,comentarios / opiniones
+207,Customer service,support,assistance,apoyo
+208,Customer service,warranty,guarantee,garantía
+209,Customer service,replacement,substitute item,reemplazo
+210,Customer service,return policy,rules for returning items,política de devoluciones
+211,Customer service,refund request,request for money back,solicitud de reembolso
+212,Customer service,service representative,customer service agent,representante de servicio
+213,Customer service,respond to a concern,address a concern,responder a una inquietud
+214,Customer service,apologize for the inconvenience,express regret about the trouble,disculparse por las molestias
+215,Customer service,meet customer needs,satisfy customer needs,satisfacer las necesidades del cliente
+216,Customer service,provide assistance,offer help,brindar ayuda
+217,Customer service,technical support,technical assistance,soporte técnico
+218,Customer service,service desk,help desk,mesa de ayuda
+219,Customer service,follow up with a client,contact a client again,dar seguimiento a un cliente
+220,Customer service,escalate a complaint,refer a complaint to a higher level,escalar una queja
+221,Customer service,loyal customer,regular customer,cliente fiel
+222,Customer service,service quality,quality of assistance,calidad del servicio
+223,Customer service,wait time,waiting period,tiempo de espera
+224,Customer service,self-service kiosk,automated service station,quiosco de autoservicio
+225,Customer service,satisfaction survey,customer opinion survey,encuesta de satisfacción
+226,Shipping and logistics,shipment,consignment,envío
+227,Shipping and logistics,dispatch,send out,despachar
+228,Shipping and logistics,ship,send goods,enviar mercancía
+229,Shipping and logistics,freight,goods transported in bulk,carga / flete
+230,Shipping and logistics,delivery date,arrival date for goods,fecha de entrega
+231,Shipping and logistics,tracking number,shipment reference number,número de seguimiento
+232,Shipping and logistics,warehouse,storage facility,almacén
+233,Shipping and logistics,inventory,stock on hand,inventario
+234,Shipping and logistics,stockroom,storage room,cuarto de almacenamiento
+235,Shipping and logistics,supplier,vendor,proveedor
+236,Shipping and logistics,vendor,seller / supplier,vendedor / proveedor
+237,Shipping and logistics,distributor,supplier to retailers,distribuidor
+238,Shipping and logistics,shortage,lack,escasez
+239,Shipping and logistics,surplus,excess,excedente
+240,Shipping and logistics,delay in delivery,late delivery,retraso en la entrega
+241,Shipping and logistics,expedite an order,speed up an order,acelerar un pedido
+242,Shipping and logistics,bulk order,large order,pedido grande / al por mayor
+243,Shipping and logistics,packaging,wrapping materials,embalaje
+244,Shipping and logistics,fragile,easily broken,frágil
+245,Shipping and logistics,perishable,likely to spoil,perecedero
+246,Shipping and logistics,in transit,being transported,en tránsito
+247,Shipping and logistics,delivery confirmation,proof of delivery,confirmación de entrega
+248,Shipping and logistics,warehouse capacity,storage capacity,capacidad del almacén
+249,Shipping and logistics,supply chain,goods supply network,cadena de suministro
+250,Shipping and logistics,customs clearance,approval at the border,despacho aduanero
+251,Contracts and policies,agreement,contract,acuerdo / contrato
+252,Contracts and policies,terms and conditions,contract rules,términos y condiciones
+253,Contracts and policies,comply with,conform to,cumplir con
+254,Contracts and policies,prohibit,forbid,prohibir
+255,Contracts and policies,permit,allow,permitir
+256,Contracts and policies,authorize,give permission for,autorizar
+257,Contracts and policies,approval,authorization,aprobación
+258,Contracts and policies,mandatory,required,obligatorio
+259,Contracts and policies,optional,not required,opcional
+260,Contracts and policies,valid,legally or officially acceptable,válido
+261,Contracts and policies,invalid,not valid,inválido
+262,Contracts and policies,renew,extend for another period,renovar
+263,Contracts and policies,terminate a contract,end a contract,terminar un contrato
+264,Contracts and policies,amend,make changes to,enmendar / modificar
+265,Contracts and policies,revise a policy,review and change a policy,revisar una política
+266,Contracts and policies,regulation,rule,regulación
+267,Contracts and policies,guideline,recommended rule,directriz
+268,Contracts and policies,restriction,limitation,restricción
+269,Contracts and policies,exemption,exception from a rule,exención
+270,Contracts and policies,confidential,private and restricted,confidencial
+271,Contracts and policies,disclose information,reveal information,divulgar información
+272,Contracts and policies,in accordance with,as required by,de acuerdo con
+273,Contracts and policies,subject to approval,requiring approval,sujeto a aprobación
+274,Contracts and policies,effective date,date a rule begins,fecha de entrada en vigor
+275,Contracts and policies,expiration date,date validity ends,fecha de vencimiento
+276,Facilities and property,premises,property / building,instalaciones
+277,Facilities and property,facility,building or service location,instalación
+278,Facilities and property,headquarters,main office,sede principal
+279,Facilities and property,branch office,regional office,sucursal
+280,Facilities and property,renovate,refurbish,renovar
+281,Facilities and property,expand,enlarge,ampliar
+282,Facilities and property,relocate,move to another location,reubicarse / trasladar
+283,Facilities and property,occupy,use or live in a space,ocupar
+284,Facilities and property,tenant,renter,inquilino
+285,Facilities and property,landlord,property owner who rents it,arrendador
+286,Facilities and property,lease,rental agreement,arrendamiento
+287,Facilities and property,vacant property,unoccupied property,propiedad desocupada
+288,Facilities and property,maintenance,upkeep,mantenimiento
+289,Facilities and property,utilities,basic services such as water and electricity,servicios básicos
+290,Facilities and property,furnish,provide furniture,amueblar
+291,Facilities and property,renovation work,refurbishment work,trabajos de renovación
+292,Facilities and property,construction site,building site,obra en construcción
+293,Facilities and property,parking lot,car park,estacionamiento
+294,Facilities and property,entrance,access point,entrada
+295,Facilities and property,exit,way out,salida
+296,Facilities and property,lobby,entrance hall,vestíbulo
+297,Facilities and property,conference facility,meeting venue,instalación para conferencias
+298,Facilities and property,storage area,storage space,área de almacenamiento
+299,Facilities and property,accessible entrance,entry that can be reached easily,entrada accesible
+300,Facilities and property,security system,protective system,sistema de seguridad
+301,Technology and office equipment,computer,PC,computadora
+302,Technology and office equipment,software,computer program,software / programa
+303,Technology and office equipment,update,install a newer version,actualizar
+304,Technology and office equipment,upgrade,improve to a newer version,mejorar / actualizar
+305,Technology and office equipment,install,set up software or equipment,instalar
+306,Technology and office equipment,configure,set up for use,configurar
+307,Technology and office equipment,operate a device,use a device,manejar un dispositivo
+308,Technology and office equipment,malfunction,fail to work properly,funcionar mal
+309,Technology and office equipment,repair equipment,fix equipment,reparar equipos
+310,Technology and office equipment,replace a component,substitute a part,reemplazar un componente
+311,Technology and office equipment,backup copy,duplicate copy for recovery,copia de seguridad
+312,Technology and office equipment,retrieve data,recover data,recuperar datos
+313,Technology and office equipment,access a file,open or reach a file,acceder a un archivo
+314,Technology and office equipment,wireless,without cables,inalámbrico
+315,Technology and office equipment,compatible,able to work together,compatible
+316,Technology and office equipment,device,piece of equipment,dispositivo
+317,Technology and office equipment,appliance,household or office machine,aparato
+318,Technology and office equipment,user manual,instruction booklet,manual de usuario
+319,Technology and office equipment,technical issue,technical problem,problema técnico
+320,Technology and office equipment,network outage,network interruption,caída de red
+321,Technology and office equipment,password reset,password change to regain access,restablecimiento de contraseña
+322,Technology and office equipment,data entry,input of information,ingreso de datos
+323,Technology and office equipment,retrieve a document,get a stored document,recuperar un documento
+324,Technology and office equipment,digital copy,electronic copy,copia digital
+325,Technology and office equipment,office supplies,workplace supplies,materiales de oficina
+326,Research and data,survey,questionnaire,encuesta
+327,Research and data,questionnaire,survey form,cuestionario
+328,Research and data,respondent,survey participant,encuestado
+329,Research and data,findings,results,hallazgos
+330,Research and data,results,outcomes,resultados
+331,Research and data,analyze,examine,analizar
+332,Research and data,evaluate,assess,evaluar
+333,Research and data,measure,quantify,medir
+334,Research and data,indicate,show,indicar
+335,Research and data,demonstrate,show clearly,demostrar
+336,Research and data,reveal,show / disclose,revelar
+337,Research and data,estimate,approximate,estimar
+338,Research and data,forecast,predict,pronosticar
+339,Research and data,data,information,datos
+340,Research and data,statistics,numerical data,estadísticas
+341,Research and data,trend,general direction,tendencia
+342,Research and data,decline,decrease,descenso / disminuir
+343,Research and data,figure,number / statistic,cifra
+344,Research and data,sample,selected group for study,muestra
+345,Research and data,representative sample,sample reflecting a population,muestra representativa
+346,Research and data,research report,study report,informe de investigación
+347,Research and data,conduct research,carry out a study,realizar una investigación
+348,Research and data,draw a conclusion,reach a conclusion,sacar una conclusión
+349,Research and data,compare results,examine results side by side,comparar resultados
+350,Research and data,significant finding,important result,hallazgo significativo
+351,Progress and performance,improve,enhance,mejorar
+352,Progress and performance,achieve,accomplish,lograr
+353,Progress and performance,attain,reach,alcanzar
+354,Progress and performance,exceed expectations,surpass expectations,superar las expectativas
+355,Progress and performance,meet a target,reach a goal,alcanzar una meta
+356,Progress and performance,fall short,not reach a target,no alcanzar lo esperado
+357,Progress and performance,perform well,do well,desempeñarse bien
+358,Progress and performance,efficient,productive without waste,eficiente
+359,Progress and performance,effective,successful in producing a result,eficaz
+360,Progress and performance,productive,producing useful results,productivo
+361,Progress and performance,successful,achieving the desired result,exitoso
+362,Progress and performance,reliable,dependable,confiable
+363,Progress and performance,accurate,correct,preciso / exacto
+364,Progress and performance,precisely,exactly,precisamente
+365,Progress and performance,consistently,regularly and reliably,constantemente
+366,Progress and performance,boost productivity,increase productivity,aumentar la productividad
+367,Progress and performance,meet a requirement,satisfy a requirement,cumplir un requisito
+368,Progress and performance,complete a task,finish a task,completar una tarea
+369,Progress and performance,make progress,advance,progresar
+370,Progress and performance,fall behind schedule,be late,retrasarse
+371,Progress and performance,gain experience,acquire experience,adquirir experiencia
+372,Progress and performance,strengthen skills,improve skills,fortalecer habilidades
+373,Progress and performance,achieve a milestone,reach a key stage,alcanzar un hito
+374,Progress and performance,exceed the budget,go over the budget,exceder el presupuesto
+375,Progress and performance,underperform,perform below expectations,rendir por debajo de lo esperado
+376,"Increase, decrease, and change",increase,rise,aumentar
+377,"Increase, decrease, and change",decrease,drop,disminuir
+378,"Increase, decrease, and change",grow,expand,crecer
+379,"Increase, decrease, and change",shrink,get smaller,reducirse
+380,"Increase, decrease, and change",soar,rise sharply,dispararse / aumentar bruscamente
+381,"Increase, decrease, and change",plummet,fall sharply,desplomarse
+382,"Increase, decrease, and change",remain stable,stay unchanged,mantenerse estable
+383,"Increase, decrease, and change",fluctuate,vary,fluctuar
+384,"Increase, decrease, and change",modify,change,modificar
+385,"Increase, decrease, and change",adjust,alter slightly,ajustar
+386,"Increase, decrease, and change",transform,change completely,transformar
+387,"Increase, decrease, and change",convert,change into,convertir
+388,"Increase, decrease, and change",upgrade,improve,mejorar
+389,"Increase, decrease, and change",worsen,get worse,empeorar
+390,"Increase, decrease, and change",improve conditions,make conditions better,mejorar las condiciones
+391,"Increase, decrease, and change",cut costs,reduce expenses,reducir costos
+392,"Increase, decrease, and change",raise prices,increase prices,subir los precios
+393,"Increase, decrease, and change",lower the fee,reduce the charge,bajar la tarifa
+394,"Increase, decrease, and change",double,increase twofold,duplicar
+395,"Increase, decrease, and change",halve,reduce by half,reducir a la mitad
+396,"Increase, decrease, and change",recover,return toward a normal state,recuperarse
+397,"Increase, decrease, and change",rebound,recover after a fall,repuntar
+398,"Increase, decrease, and change",stabilize,become steady,estabilizarse
+399,"Increase, decrease, and change",replace an old system,introduce a new system instead,reemplazar un sistema antiguo
+400,"Increase, decrease, and change",phase out,gradually discontinue,eliminar gradualmente
+401,Requirements and permission,must,have to,deber / tener que
+402,Requirements and permission,be required to,have to,estar obligado a
+403,Requirements and permission,be obliged to,be required to,estar obligado a
+404,Requirements and permission,need to,have to,necesitar
+405,Requirements and permission,be necessary,be required,ser necesario
+406,Requirements and permission,allow,permit,permitir
+407,Requirements and permission,authorize,approve officially,autorizar
+408,Requirements and permission,be eligible for,qualify for,cumplir los requisitos para
+409,Requirements and permission,qualify for,be eligible for,ser elegible para
+410,Requirements and permission,be entitled to,have the right to,tener derecho a
+411,Requirements and permission,be prohibited from,not be allowed to,tener prohibido
+412,Requirements and permission,be permitted to,be allowed to,tener permiso para
+413,Requirements and permission,obtain approval,get authorization,obtener aprobación
+414,Requirements and permission,submit an application,send in a request,presentar una solicitud
+415,Requirements and permission,meet the criteria,satisfy the standards,cumplir los criterios
+416,Requirements and permission,fulfill a requirement,meet a requirement,cumplir un requisito
+417,Requirements and permission,provide proof,supply evidence,presentar pruebas
+418,Requirements and permission,valid identification,acceptable ID,identificación válida
+419,Requirements and permission,required documents,necessary paperwork,documentos requeridos
+420,Requirements and permission,optional feature,extra feature not required,función opcional
+421,Requirements and permission,mandatory training,required training,capacitación obligatoria
+422,Requirements and permission,give permission,authorize,dar permiso
+423,Requirements and permission,deny a request,reject a request,denegar una solicitud
+424,Requirements and permission,grant access,allow entry,conceder acceso
+425,Requirements and permission,restrict access,limit entry,restringir el acceso
+426,Problems and solutions,problem,issue,problema
+427,Problems and solutions,difficulty,challenge,dificultad / reto
+428,Problems and solutions,obstacle,barrier,obstáculo
+429,Problems and solutions,resolve,settle,resolver
+430,Problems and solutions,solve,find an answer to,solucionar
+431,Problems and solutions,address a problem,deal with an issue,abordar un problema
+432,Problems and solutions,prevent,stop from happening,prevenir
+433,Problems and solutions,avoid,steer clear of,evitar
+434,Problems and solutions,mitigate,reduce the severity of,mitigar
+435,Problems and solutions,minimize,reduce as much as possible,minimizar
+436,Problems and solutions,eliminate,remove completely,eliminar
+437,Problems and solutions,remedy,corrective measure,remedio / solución
+438,Problems and solutions,solution,answer to a problem,solución
+439,Problems and solutions,alternative,other option,alternativa
+440,Problems and solutions,backup plan,contingency plan,plan alternativo
+441,Problems and solutions,contingency,possible future event or response plan,contingencia
+442,Problems and solutions,urgent matter,pressing issue,asunto urgente
+443,Problems and solutions,unexpected delay,unplanned delay,retraso inesperado
+444,Problems and solutions,error,mistake,error
+445,Problems and solutions,correct an error,fix a mistake,corregir un error
+446,Problems and solutions,investigate a complaint,look into a complaint,investigar una queja
+447,Problems and solutions,identify the cause,determine the reason,identificar la causa
+448,Problems and solutions,take corrective action,make changes to fix a problem,tomar medidas correctivas
+449,Problems and solutions,cope with,deal with,hacer frente a
+450,Problems and solutions,overcome a challenge,get past a difficulty,superar un reto
+451,Common adjectives,available,ready for use,disponible
+452,Common adjectives,vacant,unoccupied,desocupado / vacante
+453,Common adjectives,suitable,appropriate,adecuado
+454,Common adjectives,appropriate,suitable,apropiado
+455,Common adjectives,convenient,easy and practical to use,conveniente
+456,Common adjectives,relevant,related to the matter,pertinente
+457,Common adjectives,essential,necessary,esencial
+458,Common adjectives,crucial,extremely important,crucial
+459,Common adjectives,significant,important / substantial,significativo
+460,Common adjectives,substantial,considerable,considerable
+461,Common adjectives,numerous,many,numeroso
+462,Common adjectives,various,several different,diverso / varios
+463,Common adjectives,additional,extra,adicional
+464,Common adjectives,extra,additional,extra
+465,Common adjectives,prior,previous,previo
+466,Common adjectives,former,previous,anterior
+467,Common adjectives,current,present,actual / vigente
+468,Common adjectives,upcoming,approaching,próximo
+469,Common adjectives,annual,yearly,anual
+470,Common adjectives,temporary,short-term,temporal
+471,Common adjectives,permanent,lasting indefinitely,permanente
+472,Common adjectives,confidential,private,confidencial
+473,Common adjectives,mandatory,compulsory,obligatorio
+474,Common adjectives,durable,long-lasting,duradero
+475,Common adverbs and expressions,approximately,about,aproximadamente
+476,Common adverbs and expressions,nearly,almost,casi
+477,Common adverbs and expressions,particularly,especially,particularmente / especialmente
+478,Common adverbs and expressions,primarily,mainly,principalmente
+479,Common adverbs and expressions,mainly,mostly,principalmente
+480,Common adverbs and expressions,mostly,for the most part,en su mayoría
+481,Common adverbs and expressions,rapidly,quickly,rápidamente
+482,Common adverbs and expressions,gradually,little by little,gradualmente
+483,Common adverbs and expressions,annually,yearly,anualmente
+484,Common adverbs and expressions,previously,before,anteriormente
+485,Common adverbs and expressions,recently,lately,recientemente
+486,Common adverbs and expressions,shortly,soon,pronto
+487,Common adverbs and expressions,therefore,as a result,por lo tanto
+488,Common adverbs and expressions,consequently,as a consequence,en consecuencia
+489,Common adverbs and expressions,however,nevertheless,sin embargo
+490,Common adverbs and expressions,moreover,in addition,además
+491,Common adverbs and expressions,additionally,also,adicionalmente
+492,Common adverbs and expressions,otherwise,if not / in another way,de lo contrario
+493,Common adverbs and expressions,instead,in place of that,en lugar de eso
+494,Common adverbs and expressions,similarly,in a similar way,de manera similar
+495,Common adverbs and expressions,respectively,in the order mentioned,respectivamente
+496,Common adverbs and expressions,ultimately,finally / in the end,en última instancia
+497,Common adverbs and expressions,rarely,seldom,raramente
+498,Common adverbs and expressions,directly,without an intermediary,directamente
+499,Common verbs in workplace passages,obtain permission,get permission,obtener permiso
+500,Common verbs in workplace passages,submit,hand in,presentar / entregar

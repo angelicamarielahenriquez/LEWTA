@@ -1,15 +1,22 @@
+# Dependencies and build output
 node_modules/
 .next/
 out/
 build/
 coverage/
+.test-build/
+*.tsbuildinfo
+next-env.d.ts.bak
+
+# Logs and system files
 *.log
 .DS_Store
-.env*
+Thumbs.db
+
+# Secrets: never upload real keys or passwords
+.env
+.env.*
 !.env.example
 
-# Local Vercel project link/configuration
+# Vercel link (account-specific)
 .vercel/
-
-.vercel
-.env*

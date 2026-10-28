@@ -91,3 +91,31 @@ Guest data intentionally does not upload to Supabase. This guarantees that a gue
 - **Confirmation email never arrives:** review Supabase Authentication email settings, confirmations, SMTP configuration, and redirect URL configuration.
 - **Progress does not sync:** check the browser console, Vercel deployment logs, the project's Supabase URL/key, and that the SQL schema has been applied.
 - **Teacher dashboard lists only local guest sessions:** set `SUPABASE_SECRET_KEY` server-side and make sure teacher password configuration is valid, then redeploy.
+
+## 7. Turn on "Continue with Google" (optional)
+
+The Google button is already built into LEWTA. It works as soon as Google is switched on in Supabase. Until then, students see a friendly message and can use email.
+
+1. **Google Cloud Console** (https://console.cloud.google.com) → create a project (for example "LEWTA") → **APIs & Services → OAuth consent screen**: choose *External*, app name "LEWTA", your email, and save.
+2. **APIs & Services → Credentials → Create credentials → OAuth client ID** → type **Web application**.
+   - *Authorized redirect URI*: copy it from Supabase → **Authentication → Sign In / Providers → Google** (it looks like `https://ktwpnbyplskyrpwknire.supabase.co/auth/v1/callback`).
+3. Copy the **Client ID** and **Client secret** that Google shows you.
+4. In Supabase → **Authentication → Sign In / Providers → Google** → turn it on, paste the Client ID and Client secret → Save.
+5. In Supabase → **Authentication → URL Configuration**, make sure your site addresses are allowed, for example `https://lewtaplatformlocal.vercel.app/**` and `http://localhost:3000/**`.
+
+Never paste the Google client secret into the LEWTA code or into GitHub. It only goes into Supabase.
+
+## 8. Optional extras (NOT applied automatically)
+
+- `supabase/optional_visitor_comments.sql` — lets the welcome-screen comments reach your Teacher Dashboard from any device. Adds one new table only.
+- `supabase/optional_security_fixes.sql` — a fix suggested by the Supabase security advisor. Changes no tables or data.
+
+Run them only if you want them: Supabase → **SQL Editor** → paste the file → **Run**.
+
+## 9. How progress is protected (V10)
+
+- Every save first reads the account's progress in Supabase and **adds** this device's new achievements to it. An old phone or tablet can no longer erase newer progress.
+- When a student logs in, progress saved on that device and in the cloud is combined. Nothing earned is lost.
+- Aliens, destinations and city rewards that a student's completed missions prove they earned are restored automatically, with **no extra XP or gems**.
+- For accounts, the profile button "Reload from my account" only refreshes the device; it never deletes cloud progress. Only guests can reset their (local) progress.
+- No tables or security rules were changed for V10. `supabase/schema.sql` is the same as before.

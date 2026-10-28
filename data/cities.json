@@ -1,0 +1,98 @@
+[
+  {
+    "id": "new-york",
+    "name": "New York",
+    "country": "USA",
+    "emoji": "🇺🇸",
+    "art": "🗽",
+    "description": "Meetings, workplace vocabulary and business life."
+  },
+  {
+    "id": "panama-city",
+    "name": "Panama City",
+    "country": "Panama",
+    "emoji": "🇵🇦",
+    "art": "🌆",
+    "description": "Practice workplace English in the capital of Panama."
+  },
+  {
+    "id": "london",
+    "name": "London",
+    "country": "United Kingdom",
+    "emoji": "🇬🇧",
+    "art": "🏙️",
+    "description": "Emails, schedules and professional communication."
+  },
+  {
+    "id": "tokyo",
+    "name": "Tokyo",
+    "country": "Japan",
+    "emoji": "🇯🇵",
+    "art": "🗼",
+    "description": "Technology, projects and modern workplaces."
+  },
+  {
+    "id": "paris",
+    "name": "Paris",
+    "country": "France",
+    "emoji": "🇫🇷",
+    "art": "🗼",
+    "description": "Customer relations, services and professional visits."
+  },
+  {
+    "id": "mexico",
+    "name": "Mexico",
+    "country": "Mexico",
+    "emoji": "🇲🇽",
+    "art": "🏛️",
+    "description": "Sales, operations and business transactions."
+  },
+  {
+    "id": "dubai",
+    "name": "Dubai",
+    "country": "UAE",
+    "emoji": "🇦🇪",
+    "art": "🏙️",
+    "description": "Finance, purchasing and international business."
+  },
+  {
+    "id": "singapore",
+    "name": "Singapore",
+    "country": "Singapore",
+    "emoji": "🇸🇬",
+    "art": "🌇",
+    "description": "Shipping, logistics and global trade."
+  },
+  {
+    "id": "dublin",
+    "name": "Dublin",
+    "country": "Ireland",
+    "emoji": "🇮🇪",
+    "art": "🌉",
+    "description": "Hiring, training and workplace development."
+  },
+  {
+    "id": "jamaica",
+    "name": "Jamaica",
+    "country": "Jamaica",
+    "emoji": "🇯🇲",
+    "art": "🏝️",
+    "description": "Hospitality, events and customer experience."
+  },
+  {
+    "id": "andalusia",
+    "name": "Andalusia",
+    "country": "Spain",
+    "emoji": "🇪🇸",
+    "art": "🏘️",
+    "description": "Policies, facilities and everyday business English."
+  },
+  {
+    "id": "rio-de-janeiro",
+    "name": "Rio de Janeiro",
+    "country": "Brazil",
+    "emoji": "🇧🇷",
+    "art": "⛰️",
+    "description": "Review your skills and finish your global journey."
+  }
+]
