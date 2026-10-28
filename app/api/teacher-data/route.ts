@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
   const check = await checkTeacher(request.headers.get("authorization"));
   if (!check.ok) return json({ configured: check.configured, error: check.error }, check.status);
   const admin = check.admin;
+  if (!admin) return json({ configured: false, error: "Teacher Mode works, but the class list needs a valid SUPABASE_SECRET_KEY in Vercel." }, 503);
   const hidden = new Set(teacherEmails());
 
   try {
@@ -45,6 +46,10 @@ export async function GET(request: NextRequest) {
     ]);
 
     const failed = [profilesResult.error, progressResult.error, sessionsResult.error].find(Boolean);
+    if (failed && /api key/i.test(failed.message || "")) {
+      console.warn("[teacher-data] server key rejected:", failed.message);
+      return json({ configured: false, error: "The class list needs a valid SUPABASE_SECRET_KEY in Vercel (the saved key was rejected by Supabase)." }, 503);
+    }
     if (failed) {
       return json({ configured: true, error: `Could not read LEWTA student data. Run supabase/schema.sql and check the server secret key. ${failed?.message || ""}` }, 500);
     }

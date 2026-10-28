@@ -13,6 +13,7 @@ const realFetch = globalThis.fetch;
 function install() {
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://unit.supabase.co";
   process.env.SUPABASE_SECRET_KEY = "server-secret-for-tests";
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "public-key-for-tests";
   process.env.TEACHER_EMAILS = "Teacher@Example.com, teacher2@example.com";
   globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = new URL(typeof input === "string" ? input : input instanceof URL ? input.href : input.url);
