@@ -1,3 +1,4 @@
+import type { Meteor } from "@/lib/reviewRush";
 /** Shared LEWTA data types. */
 
 export type Pair = {
@@ -77,6 +78,11 @@ export type GameState = {
   correctAnswers: number;
   elapsed: number;
   total: number;
+  /** Review Rush only: the falling meteors of the current word, the wave state and the score. */
+  meteors: Meteor[];
+  waveDone: boolean;
+  over: boolean;
+  points: number;
 };
 
 export type GameResult = {

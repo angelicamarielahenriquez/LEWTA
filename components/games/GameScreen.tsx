@@ -1,113 +1,168 @@
 "use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
-import { IMAGES, alienImage } from "@/lib/assets";
-import { cityDecks, roundInfo } from "@/lib/gameData";
+import { alienImage } from "@/lib/assets";
+import { roundInfo } from "@/lib/gameData";
 import { sentenceParts } from "@/lib/questions";
+import { RUSH_LANES, destroyedCount, waveOutcome, wrongCount } from "@/lib/reviewRush";
 import type { Pair } from "@/types/lewta";
 
-const timeText = (s: number) => `${String(Math.max(0, Math.floor(s / 60))).padStart(2, "0")}:${String(Math.max(0, s % 60)).padStart(2, "0")}`;
+const timeText = (s: number) => `${Math.floor(Math.max(0, s) / 60)}:${String(Math.max(0, s) % 60).padStart(2, "0")}`;
 
-/** Shows the right board for the current mission and the shared header (timer, progress, hint). */
+function Sentence({ pair }: { pair: Pair }) {
+  const parts = sentenceParts(pair);
+  if (!parts) return <h2>What is closest in meaning to “{pair.a}”?</h2>;
+  return <h2>{parts.before}<span className="blank-line">_____</span>{parts.after}</h2>;
+}
+
+/** The five games inside the V10 mission layout (hero + game panel). */
 export function GameScreen() {
-  const { game, activeCity, timeLeft, paused, togglePause, leaveGame, startGame, showNotice } = useLewta();
+  const { game, activeCity, timeLeft, paused, togglePause, leaveGame, startGame, selectedAlien } = useLewta();
+  const [hintFor, setHintFor] = useState("");
   if (!game) return null;
   const info = roundInfo[game.roundIndex];
   const isPair = game.mode === "match" || game.mode === "speed";
-  const done = isPair ? game.matched.length : game.questionIndex;
   const pair = game.pairs[game.questionIndex] || game.pairs[0];
-  const hint = () => {
-    if (isPair) {
-      const sel = game.selectedLeft !== null ? (cityDecks[activeCity.id] || []).find((p) => p.id === game.selectedLeft) : null;
-      showNotice(sel ? `Hint: “${sel.a}” means “${sel.spanish}” in Spanish.` : "Hint: choose a word on the left first.");
-    } else showNotice(`Hint: “${pair.a}” means “${pair.spanish}”. Read the whole sentence before answering.`);
-  };
-  return <div className={`game-wrap mode-${game.mode} ${paused ? "is-paused" : ""}`}>
-    <div className="game-head">
-      <button className="btn ghost" onClick={leaveGame}>← Back to Missions</button>
-      <div className="game-title"><div className="eyebrow">{activeCity.name} · MISSION {game.roundIndex + 1}</div><h1>{info.title}</h1></div>
-      <div className="rush-status">
-        {game.mode !== "context" && game.mode !== "match" && <span>⏱ <b>{timeText(timeLeft)}</b></span>}
-        {game.mode === "review" && <span aria-label={`${game.hearts} hearts left`}>{"❤️".repeat(Math.max(0, game.hearts))}{"🤍".repeat(Math.max(0, 3 - game.hearts))}</span>}
-        <span>{isPair ? `Pairs ${game.matched.length}/${game.pairs.length}` : `Question ${Math.min(game.questionIndex + 1, game.pairs.length)}/${game.pairs.length}`}</span>
-        <span>⭐ +{info.reward} XP</span>
+  const key = `${game.roundIndex}-${game.questionIndex}`;
+  const hintOpen = hintFor === key;
+  const score = game.mode === "review" ? game.points : (isPair ? game.matched.length : game.correctAnswers) * 10;
+  const timed = game.mode === "speed" || game.mode === "review" || game.mode === "boss";
+  const hintText = isPair
+    ? (game.selectedLeft !== null ? (() => { const p = game.pairs.find((x) => x.id === game.selectedLeft); return p ? `“${p.a}” means “${p.spanish}” in Spanish.` : ""; })() : "Choose a word on the left first, then look for the word with the same meaning.")
+    : `“${pair.a}” means “${pair.spanish}” in Spanish.`;
+  const actions = <div className="rush-actions">
+    <button onClick={() => setHintFor(hintOpen ? "" : key)}>💡 {hintOpen ? "Hide Hint" : "Show Hint"}</button>
+    {timed && <button onClick={togglePause} disabled={game.over}>{paused ? "▶ Resume" : "⏸ Pause"} Timer</button>}
+    <button onClick={() => startGame(game.roundIndex)}>↻ Reset Round</button>
+  </div>;
+  const hint = hintOpen ? <p className="hint-text">{hintText}</p> : null;
+  const city = activeCity.name.toUpperCase();
+
+  if (game.mode === "review") return <>
+    <button className="btn ghost" onClick={leaveGame}>← Back to Missions</button>
+    <div className="hero" style={{ marginTop: 22 }}>
+      <div><div className="eyebrow">{city} · REVIEW RUSH</div><h1>☄️ Review Rush</h1><p>Remove the wrong falling words. Let the correct synonym reach the ship!</p></div>
+      <Image className="hero-rocket" src={alienImage(selectedAlien.id)} alt="" width={200} height={140} />
+    </div>
+    <div className="demo-game rush-demo"><ReviewRush pair={pair} actions={actions} hint={hint} score={score} time={timeLeft} /></div>
+    <p className="note">Destroy the 3 wrong meteors before they land and let the correct synonym reach the ground. Clicking the correct synonym or letting a wrong meteor land costs one life — you have 3 lives for all {game.pairs.length} words.</p>
+  </>;
+
+  return <>
+    <button className="btn ghost" onClick={leaveGame}>← Back to Missions</button>
+    <div className="hero" style={{ marginTop: 22 }}>
+      <div className="eyebrow">{city} · MISSION {game.roundIndex + 1}</div><h1>{info.title}</h1><p>{info.subtitle}</p>
+    </div>
+    <div className="demo-game">
+      <div className="demo-toolbar"><span>⭐ Score: {score}</span><span>{isPair ? `Pairs ${game.matched.length} / ${game.pairs.length}` : `Question ${Math.min(game.questionIndex + 1, game.pairs.length)} / ${game.pairs.length}`}</span><span>⏱ <b id="demo-timer">{timed ? timeText(timeLeft) : "∞"}</b></span></div>
+      <div className="question">
+        {paused && <p className="hint-text">⏸ Paused — press Resume to continue.</p>}
+        {isPair ? <MatchBoard actions={actions} hint={hint} /> : game.mode === "context" ? <ContextBoard pair={pair} actions={actions} hint={hint} /> : <BossBoard pair={pair} actions={actions} hint={hint} />}
       </div>
     </div>
-    <div className="progressbar game-progress"><div style={{ width: `${(done / Math.max(1, game.pairs.length)) * 100}%` }} /></div>
-    <div className="rush-actions">
-      <button onClick={hint}><Image src={IMAGES.games.hint} alt="" width={22} height={22} /> Show Hint</button>
-      {(game.mode === "speed" || game.mode === "review" || game.mode === "boss") && <button onClick={togglePause}>{paused ? "▶ Resume Timer" : "⏸ Pause Timer"}</button>}
-      <button onClick={() => startGame(game.roundIndex)}>↻ Reset Round</button>
-    </div>
-    {paused && <div className="paused-banner">⏸ Paused — press “Resume Timer” to continue.</div>}
-    {isPair ? <MatchBoard /> : game.mode === "review" ? <ReviewRushBoard pair={pair} /> : <QuestionBoard pair={pair} />}
-  </div>;
+  </>;
 }
 
-/** Learn & Match and Speed Match. */
-function MatchBoard() {
+type BoardProps = { actions: React.ReactNode; hint: React.ReactNode };
+
+function MatchBoard({ actions, hint }: BoardProps) {
   const { game, chooseMatchLeft, chooseMatchRight, paused } = useLewta();
   if (!game) return null;
-  return <div className="match-columns" aria-disabled={paused}>
-    <div className="word-column">{game.leftCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
-      className={`word-card-btn left color-${p.id % 5} ${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedLeft === p.id ? "selected" : ""}`} onClick={() => chooseMatchLeft(p.id)}>{p.a}</button>)}</div>
-    <div className="word-column">{game.rightCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
-      className={`word-card-btn right ${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedRight === p.id ? "wrong" : ""}`} onClick={() => chooseMatchRight(p.id)}>{p.b}</button>)}</div>
-  </div>;
+  return <>
+    <div className="eyebrow">{game.mode === "speed" ? "SPEED MATCH · BEAT THE CLOCK" : "LEARN & MATCH"}</div>
+    <h2>Find the matching pairs</h2>
+    <p>Choose a word on the left, then its synonym on the right.</p>
+    {actions}{hint}
+    <div className="choices match-board">
+      <div className="match-col">{game.leftCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
+        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedLeft === p.id ? "picked" : ""}`} onClick={() => chooseMatchLeft(p.id)}>{p.a}</button>)}</div>
+      <div className="match-col">{game.rightCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
+        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedRight === p.id ? "wrong" : ""}`} onClick={() => chooseMatchRight(p.id)}>{p.b}</button>)}</div>
+    </div>
+  </>;
 }
 
-function Sentence({ pair, highlight }: { pair: Pair; highlight?: boolean }) {
-  const parts = sentenceParts(pair);
-  if (!parts) return <p className="sentence">In this business context, what is closest in meaning to “{pair.a}”?</p>;
-  return <p className="sentence">{parts.before}{highlight ? <mark>{parts.target}</mark> : <span className="blank" aria-label="blank">_____</span>}{parts.after}</p>;
+function Feedback({ pair }: { pair: Pair }) {
+  const { game, nextQuestion } = useLewta();
+  if (!game?.answered) return null;
+  return <>
+    <div className="feedback">{game.answerCorrect ? "Correct! " : "Try again next time! "}Best answer: {pair.b}{pair.spanish ? ` (${pair.spanish})` : ""}.</div>
+    {pair.note && <p className="feedback-note">{pair.note}</p>}
+    <button className="btn" onClick={nextQuestion} autoFocus>{game.questionIndex >= game.pairs.length - 1 ? "View Results →" : "Next Question →"}</button>
+  </>;
 }
 
-/** Context Match (typing) and Business City Boss (A–D). */
-function QuestionBoard({ pair }: { pair: Pair }) {
-  const { game, setGameInput, submitAnswer, nextQuestion, paused } = useLewta();
+function ContextBoard({ pair, actions, hint }: BoardProps & { pair: Pair }) {
+  const { game, setGameInput, submitAnswer } = useLewta();
   if (!game) return null;
-  const isContext = game.mode === "context";
-  return <div className="question">
-    <div className="eyebrow">{isContext ? "TYPE THE COMPLETE SYNONYM" : "CHOOSE THE BEST ANSWER"}</div>
+  return <>
+    <div className="eyebrow">CONTEXT MATCH</div>
     <Sentence pair={pair} />
-    {isContext ? <form className="typing-row" onSubmit={(e) => { e.preventDefault(); submitAnswer(game.input); }}>
-      <input aria-label="Type the complete synonym" autoComplete="off" autoCapitalize="off" spellCheck={false} value={game.input} onChange={(e) => setGameInput(e.target.value)} placeholder="Type the complete answer…" disabled={game.answered} />
-      <button className="btn" disabled={game.answered || !game.input.trim()}>Check answer</button>
-    </form> : <>
-      <div className="choices">{game.options.map((o, i) => <button key={o.value} disabled={game.answered || paused}
-        className={`${game.input === String.fromCharCode(65 + i) ? "picked" : ""} ${game.answered && o.correct ? "correct" : ""} ${game.answered && game.chosenValue === o.value && !o.correct ? "incorrect" : ""}`}
-        onClick={() => setGameInput(String.fromCharCode(65 + i))}><b>{String.fromCharCode(65 + i)}</b> {o.value}</button>)}</div>
-      <button className="btn submit-btn" disabled={game.answered || !game.input || paused} onClick={() => submitAnswer(game.input)}>➤ Submit</button>
-    </>}
-    {game.answered && <div className={`feedback-panel ${game.answerCorrect ? "good" : "bad"}`} role="status">
-      <h3>{game.answerCorrect ? "✅ Correct!" : "❌ Not quite!"}</h3>
-      <p><b>Best answer:</b> {pair.b}{pair.spanish ? ` — ${pair.spanish}` : ""}</p>
-      {pair.note && <p>{pair.note}</p>}
-      <p className="small">Sentence: {pair.example}</p>
-      <button className="btn yellow" onClick={nextQuestion} autoFocus>{game.questionIndex >= game.pairs.length - 1 ? "View Results" : "Next Question →"}</button>
-    </div>}
-  </div>;
+    <p>Type the complete synonym that fits the sentence.</p>
+    {actions}{hint}
+    <form className="type-answer" onSubmit={(e) => { e.preventDefault(); submitAnswer(game.input); }}>
+      <input aria-label="Type the complete synonym" autoComplete="off" autoCapitalize="off" spellCheck={false} placeholder="Type the synonym..." value={game.input} disabled={game.answered} onChange={(e) => setGameInput(e.target.value)} />
+      <button className="pink-action" disabled={game.answered || !game.input.trim()}>Check answer</button>
+    </form>
+    <Feedback pair={pair} />
+  </>;
 }
 
-/** Review Rush: wrong words fall like meteors; destroy them and let the correct synonym land. */
-function ReviewRushBoard({ pair }: { pair: Pair }) {
-  const { game, removeReviewRock, paused, selectedAlien } = useLewta();
+function BossBoard({ pair, actions, hint }: BoardProps & { pair: Pair }) {
+  const { game, submitAnswer, paused } = useLewta();
   if (!game) return null;
-  const wrongLeft = game.options.filter((o) => !o.correct && !game.removed.includes(o.value)).length;
-  const landing = wrongLeft === 0;
-  const lanes = [6, 30, 54, 76];
-  return <div className="rush-board" style={{ backgroundImage: `url("${IMAGES.backgrounds.reviewRush}")` }}>
-    <div className="question rush-question">
+  return <>
+    <div className="eyebrow">BUSINESS CITY BOSS</div>
+    <Sentence pair={pair} />
+    <p>Choose the best answer.</p>
+    {actions}{hint}
+    <div className="choices">{game.options.map((o, i) => <button key={o.value} disabled={game.answered || paused}
+      className={`${game.answered && o.correct ? "right" : ""} ${game.answered && game.chosenValue === o.value && !o.correct ? "wrong" : ""}`}
+      onClick={() => submitAnswer(String.fromCharCode(65 + i))}>{o.value}</button>)}</div>
+    <Feedback pair={pair} />
+  </>;
+}
+
+function ReviewRush({ pair, actions, hint, score, time }: BoardProps & { pair: Pair; score: number; time: number }) {
+  const { game, hitMeteor, paused, startGame, leaveGame } = useLewta();
+  const started = game?.questionIndex === 0 && game.points === 0 && game.hearts === 3;
+  // On phones, bring the target word and the whole play area into view when Review Rush starts.
+  useEffect(() => {
+    if (!started || typeof window === "undefined" || window.innerWidth > 720) return;
+    document.querySelector(".rush-demo .question")?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [started]);
+  if (!game) return null;
+  const wrongTotal = wrongCount(game.meteors);
+  const destroyed = destroyedCount(game.meteors);
+  const outcome = game.waveDone ? waveOutcome(game.meteors) : "pending";
+  const message = game.over ? "💥 Game over — you ran out of lives."
+    : outcome === "success" ? "🎉 Excellent! You destroyed every wrong meteor and the correct synonym landed safely."
+    : outcome === "failed" ? `This word goes to Words to Revisit. The correct synonym was “${pair.b}”.`
+    : `Wrong meteors destroyed: ${destroyed}/${wrongTotal}`;
+  return <>
+    <div className="rush-status"><span>⭐ Score: {score}</span><span>Question {game.questionIndex + 1} / {game.pairs.length}</span><span>⏱ <b id="demo-timer">{timeText(time)}</b></span><span className="rush-lives" aria-label={`${game.hearts} lives left`}>{"❤️".repeat(Math.max(0, game.hearts))}{"🖤".repeat(Math.max(0, 3 - game.hearts))} {Math.max(0, game.hearts)} lives</span></div>
+    <div className="question">
       <div className="eyebrow">TARGET WORD</div>
-      <Sentence pair={pair} highlight />
-      <p className="small">Click every falling word that is NOT a synonym of the highlighted word. Let the correct synonym land on your ship!</p>
+      <h2>{pair.a}</h2>
+      <p>Click every falling word that is NOT a synonym. Leave the correct synonym to fall!</p>
+      <p className="rush-context">“{pair.example}”</p>
+      {actions}{hint}
+      <div className={`meteor-field ${paused ? "is-paused" : ""}`} key={`${game.roundIndex}-${game.questionIndex}`} data-testid="meteor-field">
+        {game.meteors.map((m) => <button key={m.id} type="button" data-meteor={m.id} data-status={m.status} data-correct={m.correct ? "1" : undefined}
+          className={`meteor-word lane-${m.lane} ${m.status}${m.status === "landed" ? " correct" : ""}`}
+          disabled={m.status !== "falling" || paused || game.over}
+          style={{ left: `${RUSH_LANES[m.lane]}%`, top: `calc((100% - var(--meteor-h)) * ${(m.y / 100).toFixed(4)})` }}
+          onPointerDown={(e) => { e.preventDefault(); hitMeteor(m.id); }}
+          onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); hitMeteor(m.id); } }}>
+          <span className="meteor-text">{m.status === "destroyed" ? "💥" : "☄️"} {m.value}</span></button>)}
+        {paused && !game.over && <div className="rush-overlay"><b>⏸ Paused</b><span>Press Resume Timer to continue.</span></div>}
+        {game.over && <div className="rush-overlay game-over" role="alert">
+          <b>GAME OVER</b><span>You ran out of lives. Your progress is safe — try Review Rush again!</span>
+          <div className="result-actions"><button className="btn" onClick={() => startGame(game.roundIndex)}>Try Again ↻</button><button className="btn ghost" onClick={leaveGame}>← Back to Missions</button></div>
+        </div>}
+      </div>
+      <p className="rush-message" aria-live="polite">{message}</p>
     </div>
-    <div className={`meteor-field ${paused ? "paused" : ""}`} key={`${game.questionIndex}`}>
-      {game.options.map((o, i) => game.removed.includes(o.value) ? null :
-        <button key={o.value} className={`meteor-word ${landing && o.correct ? "landing" : ""}`} disabled={paused || landing}
-          style={{ left: `${lanes[i % lanes.length]}%`, animationDelay: `${i * 0.9}s` }} onClick={() => removeReviewRock(o)}>☄️ {o.value}</button>)}
-      <Image className="rush-ship" src={alienImage(selectedAlien.id)} alt="Your alien ship" width={90} height={90} />
-    </div>
-    <p className="rush-message" role="status">{landing ? "🎉 Excellent! The correct synonym landed safely." : `Wrong meteors left: ${wrongLeft}`}</p>
-  </div>;
+  </>;
 }

@@ -42,3 +42,17 @@
 
 ## Accessories (new catalog, original rules)
 Original item IDs were kept so students keep what they own. Items without a picture now use your artwork: Festival Pin → Mexican Hat, Neon Visor → Money Bag, Orchid Pin → Orchid Flower, Island Headphones → Jamaican Maracas, Flamenco Flower → Flamenco Shoe, Magic Hat → Magic Wand, Space Headphones → Purple Headphones. New items from your images (Golden Frog, Sancocho, Paris Beret, Moustache and 9 face stickers) were added to cities, buyable with gems.
+
+## Review Rush and Teacher Mode (October 28)
+
+- **Review Rush:** the play area is transparent so the original space background shows. Meteors really fall: their
+  positions live in the game state and move with a game loop (`lib/reviewRush.ts`). Destroy the 3 wrong meteors before
+  they land; the correct synonym must reach the ground. Clicking the correct synonym or letting a wrong meteor land costs
+  one of 3 lives. 10 words per game, real score, Game Over screen with Try Again. Pause freezes meteors and timer; Reset
+  restores everything. Works with mouse, touch and keyboard. Time limit for the whole game is now 3:00.
+- **Teacher Mode:** no shared password any more. The server checks the signed-in Supabase account on every request
+  (`lib/server/teacherAccess.ts`): it must have a verified e-mail listed in `TEACHER_EMAILS`, or `profiles.role = 'teacher'`.
+  The teacher gets all 12 cities, all 60 missions, every alien, accessory and stamp for inspection, and nothing she does
+  is saved. Students and guests cannot open the dashboard, and the class-data API refuses them.
+- **Teacher Dashboard:** each student's cities and missions, accuracy, XP, gems, streak, rewards, words to revisit and
+  game results — only data that is actually stored.

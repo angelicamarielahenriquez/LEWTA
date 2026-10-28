@@ -26,7 +26,7 @@ function summarize(sessions: StudentSessionRecord[]) {
 }
 const readJson = (key: string) => { try { return JSON.parse(localStorage.getItem(key) || "{}") as Record<string, unknown>; } catch { return {}; } };
 
-export async function loadTeacherData(): Promise<{ rows: TeacherRow[]; comments: VisitorComment[]; notice?: string }> {
+export async function loadTeacherData(accessToken: string | null): Promise<{ rows: TeacherRow[]; comments: VisitorComment[]; notice?: string }> {
   const sessions = readLocalSessions();
   const accounts = readJson("lewta_accounts") as Record<string, { username?: string; firstName?: string; lastName?: string; promotion?: string }>;
   const legacyRows: TeacherRow[] = Object.values(accounts).map((a) => {
@@ -51,12 +51,12 @@ export async function loadTeacherData(): Promise<{ rows: TeacherRow[]; comments:
   let notice: string | undefined;
   if (isSupabaseConfigured) {
     try {
-      const response = await fetch("/api/teacher-data", { method: "GET", cache: "no-store" });
+      const response = await fetch("/api/teacher-data", { method: "GET", cache: "no-store", headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {} });
       const result = await response.json().catch(() => ({}));
       if (response.ok && result.configured && Array.isArray(result.students)) {
         rows = [...(result.students as TeacherRow[]), ...guestRows];
         if (Array.isArray(result.comments)) comments = [...result.comments.map((c: { name: string; message: string; created_at: string }) => ({ name: c.name, message: c.message, date: c.created_at })), ...comments];
-      } else if (response.status === 401) { rows = guestRows; notice = "Teacher session expired. Unlock the Teacher Dashboard again to load cloud student records."; }
+      } else if (response.status === 401 || response.status === 403) { rows = guestRows; notice = result.error || "Please log in again with your teacher account."; }
       else { rows = guestRows; notice = result.error || "Supabase class reporting is not configured yet. Local guest records are still available."; }
     } catch { rows = guestRows; notice = "Could not reach Supabase class reporting. Local guest records are still available."; }
   }

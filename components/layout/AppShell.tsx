@@ -3,6 +3,7 @@ import { useLewta } from "@/components/LewtaContext";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { MusicSelector } from "@/components/layout/MusicSelector";
 import { WelcomeScreen } from "@/components/screens/WelcomeScreen";
 import { AuthScreen } from "@/components/screens/AuthScreen";
 import { GuestScreen } from "@/components/screens/GuestScreen";
@@ -16,10 +17,10 @@ import { RevisitScreen } from "@/components/screens/RevisitScreen";
 import { HowToPlayScreen } from "@/components/screens/HowToPlayScreen";
 import { TeacherLoginScreen, TeacherScreen } from "@/components/screens/TeacherScreens";
 
-/** Chooses the screen for the current page and wraps it in the header, sidebar and mobile menu. */
+/** Page frame from the V10 prototype: header, side menu, soundtrack bar, phone menu. */
 export function AppShell({ notice, onCloseNotice }: { notice: string; onCloseNotice: () => void }) {
   const { page, teacherAuthorized } = useLewta();
-  const publicPage = page === "welcome" || page === "register" || page === "login" || page === "guest";
+  const formPage = page === "register" || page === "login" || page === "guest";
   const screen = (() => {
     switch (page) {
       case "welcome": return <WelcomeScreen />;
@@ -39,11 +40,12 @@ export function AppShell({ notice, onCloseNotice }: { notice: string; onCloseNot
       default: return <HubScreen />;
     }
   })();
-  return <div className="lewta-app">
-    <div className="space-stars" aria-hidden="true" />
-    {page !== "welcome" && <TopBar />}
-    {publicPage ? screen : <div className="shell"><Sidebar /><main className="main">{screen}</main></div>}
-    {!publicPage && <MobileNav />}
-    {notice && <div className="toast" role="status"><span aria-hidden="true">✨</span><p>{notice}</p><button aria-label="Close notification" onClick={onCloseNotice}>×</button></div>}
-  </div>;
+  return <>
+    <div className="stars" aria-hidden="true" />
+    {page === "welcome" ? screen : <>
+      <TopBar />
+      {formPage ? screen : <><div className="shell"><Sidebar /><main><MusicSelector />{screen}</main></div><MobileNav /></>}
+    </>}
+    {notice && <div className="lewta-toast" role="status"><span aria-hidden="true">✨</span><p>{notice}</p><button aria-label="Close notification" onClick={onCloseNotice}>✕</button></div>}
+  </>;
 }

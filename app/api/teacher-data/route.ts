@@ -1,13 +1,14 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { checkTeacher, teacherEmails } from "@/lib/server/teacherAccess";
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- rows come from Supabase JSON columns */
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const COOKIE_NAME = "lewta_teacher_session";
+function json(data: unknown, status = 200) {
+  return NextResponse.json(data, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
+}
 
 type DbSession = {
   session_id: string;
@@ -29,51 +30,14 @@ type DbSession = {
   game_progress: Record<string, unknown> | null;
 };
 
-function safeEqual(left: string, right: string): boolean {
-  const a = Buffer.from(left, "utf8");
-  const b = Buffer.from(right, "utf8");
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
-function authenticatedTeacherCookie(request: NextRequest): boolean {
-  const secret = process.env.TEACHER_DASHBOARD_SECRET || "";
-  const password = process.env.TEACHER_DASHBOARD_PASSWORD || "";
-  if (!password || secret.length < 32) return false;
-  const value = request.cookies.get(COOKIE_NAME)?.value;
-  if (!value) return false;
-  const separator = value.indexOf(".");
-  if (separator < 1) return false;
-  const expiry = value.slice(0, separator);
-  const signature = value.slice(separator + 1);
-  if (!/^\d{10,}$/.test(expiry) || Number(expiry) <= Math.floor(Date.now() / 1000)) return false;
-  const expected = createHmac("sha256", secret).update(`lewta-teacher:${expiry}`).digest("hex");
-  return safeEqual(signature, expected);
-}
-
-function json(data: unknown, status = 200) {
-  return NextResponse.json(data, { status, headers: { "Cache-Control": "no-store, max-age=0" } });
-}
-
 export async function GET(request: NextRequest) {
-  if (!authenticatedTeacherCookie(request)) {
-    return json({ error: "Teacher authentication is required." }, 401);
-  }
-
-  const projectUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  // Server-only key. Never use a NEXT_PUBLIC_ prefix for this value.
-  const secretKey = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || "";
-  if (!projectUrl || !secretKey) {
-    return json({
-      configured: false,
-      error: "Supabase class reporting needs SUPABASE_SECRET_KEY (server-only) in the deployment environment. Local guest records are still available.",
-    }, 503);
-  }
+  // Every request is re-checked: only the verified teacher account can read class data.
+  const check = await checkTeacher(request.headers.get("authorization"));
+  if (!check.ok) return json({ configured: check.configured, error: check.error }, check.status);
+  const admin = check.admin;
+  const hidden = new Set(teacherEmails());
 
   try {
-    const admin = createClient(projectUrl, secretKey, {
-      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-    });
-
     const [profilesResult, progressResult, sessionsResult] = await Promise.all([
       admin.from("profiles").select("id,email,first_name,last_name,username,promotion,role").order("last_name", { ascending: true }),
       admin.from("player_progress").select("user_id,progress,updated_at"),
@@ -88,7 +52,7 @@ export async function GET(request: NextRequest) {
     const progressByUser = new Map<string, Record<string, any>>();
     for (const row of progressResult.data || []) progressByUser.set(row.user_id, (row.progress || {}) as Record<string, any>);
     const sessionRows = (sessionsResult.data || []) as unknown as DbSession[];
-    const profiles = (profilesResult.data || []).filter((profile) => profile.role !== "teacher");
+    const profiles = (profilesResult.data || []).filter((profile) => profile.role !== "teacher" && profile.id !== check.userId && !hidden.has(String(profile.email || "").toLowerCase()));
 
     const students = profiles.map((profile) => {
       const gameProgress = progressByUser.get(profile.id) || {};

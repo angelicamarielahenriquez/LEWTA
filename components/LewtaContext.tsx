@@ -8,7 +8,7 @@ import type { Alien, Accessory } from "@/lib/gameData";
 import type { AudioSettings } from "@/lib/audio";
 import type { TeacherRow } from "@/lib/teacher";
 import type { VisitorComment } from "@/lib/comments";
-import type { City, GameOption, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
+import type { City, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
 
 export type ReviewMode = "flashcards" | "multiple" | "typing";
 
@@ -59,7 +59,8 @@ export type LewtaApi = {
   setGameInput: (value: string) => void;
   submitAnswer: (value: string) => void;
   nextQuestion: () => void;
-  removeReviewRock: (option: GameOption) => void;
+  /** Review Rush: click/tap a falling meteor. */
+  hitMeteor: (id: string) => void;
   // words to revisit
   markMastered: (cityId: string, id: number) => void;
   addMiss: (cityId: string, ids: number[]) => void;
@@ -72,11 +73,12 @@ export type LewtaApi = {
   // audio
   setAudio: (next: Partial<AudioSettings>) => void;
   playEffect: (name: "click" | "correct" | "incorrect" | "celebrate" | "levelUp" | "timeUp", level?: number) => void;
-  playWelcomeMusic: () => void;
-  isMusicPlaying: () => boolean;
+  /** "" = no music, "lewta" = LEWTA theme, "review" = Review Rush, or a city id. */
+  musicTrack: string;
+  chooseTrack: (track: string) => void;
+  toggleMusic: () => void;
   // teacher
   openTeacherDashboard: () => void;
-  teacherLogin: (password: string) => void;
   teacherLogout: () => void;
   reloadTeacherRows: () => void;
   startTeacherTest: (cityId: string) => void;

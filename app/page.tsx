@@ -14,14 +14,15 @@ import { accessories, aliens, cities, cityDecks, cityName, playOrder, roundInfo 
 import { applyMissionComplete, defaultProgress, describeRecovery, mergeProgress, migrateLegacyProgress, type RecoveryReport } from "@/lib/progress";
 import { buildRoundPairs, createQuestionOptions, normalizeAnswer, shuffle } from "@/lib/questions";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { createMeteors, hitMeteor as hitMeteorAt, stepMeteors, waveOutcome, type Meteor } from "@/lib/reviewRush";
 import { loadTeacherData, type TeacherRow } from "@/lib/teacher";
 import type { VisitorComment } from "@/lib/comments";
-import type { GameMode, GameOption, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
+import type { GameMode, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
 
 const freshGame = (mode: GameMode, roundIndex: number, pairs: Pair[]): GameState => ({
   mode, roundIndex, pairs, matched: [], leftCards: shuffle(pairs), rightCards: shuffle(pairs), selectedLeft: null, selectedRight: null,
   questionIndex: 0, options: [], input: "", answered: false, answerCorrect: null, chosenValue: "", removed: [], hearts: 3, mistakes: 0,
-  correctAnswers: 0, elapsed: 0, total: pairs.length,
+  correctAnswers: 0, elapsed: 0, total: pairs.length, meteors: [], waveDone: false, over: false, points: 0,
 });
 const sameProgress = (a: Progress, b: Progress) => JSON.stringify({ ...a, updatedAt: "" }) === JSON.stringify({ ...b, updatedAt: "" });
 const stamp = (p: Progress): Progress => ({ ...p, updatedAt: new Date().toISOString() });
@@ -54,11 +55,15 @@ export default function Home() {
   const [teacherAuthorized, setTeacherAuthorized] = useState(false);
   const [teacherAccessConfigured, setTeacherAccessConfigured] = useState(true);
   const [teacherAuthError, setTeacherAuthError] = useState("");
-  const [teacherPreviewMode, setTeacherPreviewMode] = useState(false);
+  /** Teacher Mode = the server confirmed this signed-in account is the teacher. It unlocks everything for testing and never saves progress. */
+  const teacherPreviewMode = teacherAuthorized;
 
   const audioRef = useRef<AudioController | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameRef = useRef<GameState | null>(null);
+  /** Mirrors `paused` without waiting for a render, so the meteor loop stops on the very next frame. */
+  const pausedRef = useRef(false);
+  const pausePlay = useCallback((v: boolean) => { pausedRef.current = v; setPaused(v); }, []);
   const progressRef = useRef<Progress>(progress);
   const playerRef = useRef<Player | null>(null);
   const cloudTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -70,7 +75,8 @@ export default function Home() {
   const selectedAlien = aliens.find((a) => a.id === progress.selectedAlien) || aliens[0];
   const equipped = accessories.find((a) => a.id === progress.equippedAccessory) || accessories[0];
 
-  useEffect(() => { gameRef.current = game; }, [game]);
+  // Review Rush updates gameRef itself on every frame (it must never be rolled back to an older render).
+  useEffect(() => { if (!game || game.mode !== "review") gameRef.current = game; }, [game]);
   useEffect(() => { progressRef.current = progress; }, [progress]);
   useEffect(() => { playerRef.current = player; }, [player]);
 
@@ -94,10 +100,17 @@ export default function Home() {
     setAudioState((prev) => { const s = { ...prev, ...next }; saveAudioSettings(s); sound().apply(s); return s; });
   }, []);
   const playEffect: LewtaApi["playEffect"] = useCallback((name, level = 0.45) => sound().effect(name, level), []);
-  const playCityMusic = useCallback((cityId: string, review = false) => {
-    sound().playMusic(review ? AUDIO.reviewRush : cityMusic(cityId), review ? 0.22 : 0.16);
+  const [musicTrack, setMusicTrack] = useState("");
+  const lastTrack = useRef("lewta");
+  const playTrack = useCallback((track: string) => {
+    const src = track === "lewta" ? AUDIO.lewtaTheme : track === "review" ? AUDIO.reviewRush : cityMusic(track);
+    sound().playMusic(src, track === "review" ? 0.22 : track === "lewta" ? 0.25 : 0.16);
+    lastTrack.current = track; setMusicTrack(track);
   }, []);
-  const stopMusic = useCallback(() => sound().stopMusic(), []);
+  const playCityMusic = useCallback((cityId: string, review = false) => {
+    playTrack(review ? "review" : cityId);
+  }, [playTrack]);
+  const stopMusic = useCallback(() => { sound().stopMusic(); setMusicTrack(""); }, []);
 
   // ---------- saving progress ----------
   const updateProgress = useCallback((updater: (prev: Progress) => Progress) => {
@@ -202,7 +215,7 @@ export default function Home() {
   // ---------- timer ----------
   const finishRef = useRef<(passed: boolean, timedOut?: boolean) => void>(() => {});
   useEffect(() => {
-    if (page !== "game" || !game || game.mode === "match" || game.mode === "context" || (game.answered && game.mode !== "review") || timeLeft <= 0 || paused) return;
+    if (page !== "game" || !game || game.over || game.mode === "match" || game.mode === "context" || (game.answered && game.mode !== "review") || timeLeft <= 0 || paused) return;
     const t = setTimeout(() => {
       if (timeLeft <= 1) { setTimeLeft(0); finishRef.current(false, true); }
       else setTimeLeft((v) => v - 1);
@@ -300,7 +313,7 @@ export default function Home() {
     }
     stopMusic();
     try { localStorage.removeItem("lewta_session"); } catch { /* ignore */ }
-    setPlayer(null); setProgress(defaultProgress()); setGame(null); setTeacherPreviewMode(false); setPage("welcome"); clearAuthMessages();
+    setPlayer(null); setProgress(defaultProgress()); setGame(null); setTeacherAuthorized(false); setTeacherRows([]); setPage("welcome"); clearAuthMessages();
   }
 
   // ---------- words to revisit ----------
@@ -347,17 +360,18 @@ export default function Home() {
     const pairs = buildRoundPairs(activeCity.id, roundIndex, progress.missedPairIds[activeCity.id] || []);
     const next = freshGame(info.mode, roundIndex, pairs);
     if (info.mode === "boss" || info.mode === "review") next.options = createQuestionOptions(pairs[0], activeDeck);
-    setPaused(false); setGame(next); gameRef.current = next; setGameResult(null); setTimeLeft(info.time || 0); setPage("game");
+    if (info.mode === "review") { next.meteors = createMeteors(next.options); rushPairFailed.current = false; }
+    pausePlay(false); setGame(next); gameRef.current = next; setGameResult(null); setTimeLeft(info.time || 0); setPage("game");
     if (!teacherPreviewMode) recordStudentActivity(player, "game-start", { cityId: activeCity.id, roundIndex, title: info.title, questionCount: pairs.length }, progress);
     playCityMusic(activeCity.id, info.mode === "review"); playEffect("click", 0.28);
   }
-  function leaveGame() { setGame(null); gameRef.current = null; setPaused(false); setPage("city"); playCityMusic(activeCity.id); }
+  function leaveGame() { setGame(null); gameRef.current = null; pausePlay(false); setPage("city"); playCityMusic(activeCity.id); }
 
   function finishGame(passed: boolean, timedOut = false) {
     const g = gameRef.current;
     if (!g) return; // already finished (prevents double rewards)
     gameRef.current = null;
-    setPaused(false); setGame(null);
+    pausePlay(false); setGame(null);
     const cityId = activeCity.id;
     const correct = g.mode === "match" || g.mode === "speed" ? g.matched.length : g.correctAnswers;
     let result: GameResult = { passed, timedOut, correct, total: g.total, roundIndex: g.roundIndex, cityId, xpEarned: 0, gemsEarned: 0, replay: false };
@@ -388,7 +402,7 @@ export default function Home() {
   useEffect(() => { finishRef.current = finishGame; });
 
   function setGameInput(value: string) { setGame((prev) => (prev ? { ...prev, input: value } : prev)); }
-  function togglePause() { setPaused((v) => !v); }
+  function togglePause() { pausePlay(!pausedRef.current); }
 
   function submitAnswer(value: string) {
     const g = game;
@@ -438,45 +452,70 @@ export default function Home() {
       setTimeout(() => setGame((prev) => (prev ? { ...prev, selectedLeft: null, selectedRight: null } : prev)), 650);
     }
   }
-  function removeReviewRock(option: GameOption) {
-    const g = game;
-    if (!g || g.mode !== "review" || paused) return;
+  // ---------- Review Rush (falling meteors kept in game state) ----------
+  const rushPairFailed = useRef(false);
+  function commitRush(g: GameState, meteors: Meteor[], livesLost: number, notice?: string) {
     const pair = g.pairs[g.questionIndex];
-    if (option.correct) {
-      const hearts = g.hearts - 1;
+    let next: GameState = { ...g, meteors, hearts: g.hearts - livesLost, mistakes: g.mistakes + livesLost };
+    if (livesLost > 0) {
       playEffect("incorrect", 0.6);
-      if (!teacherPreviewMode) { addMiss(activeCity.id, [pair.id]); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: pair.id, correct: false, completed: false }); }
-      if (hearts <= 0) {
-        const next = { ...g, hearts: 0, mistakes: g.mistakes + 1 }; setGame(next); gameRef.current = next;
-        showNotice("The correct meteor was destroyed. Try Review Rush again!");
-        setTimeout(() => finishRef.current(false), 120);
-      } else {
-        setGame((prev) => (prev ? { ...prev, hearts, mistakes: prev.mistakes + 1 } : prev));
-        showNotice("That was the correct synonym! You lost a heart — let it fall next time.");
-      }
+      if (!rushPairFailed.current && !teacherPreviewMode) { addMiss(activeCity.id, [pair.id]); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: pair.id, correct: false, completed: true }); }
+      rushPairFailed.current = true;
+      if (notice) showNotice(notice);
+    }
+    if (next.hearts <= 0) {
+      next = { ...next, hearts: 0, over: true };
+      gameRef.current = next; setGame(next); playEffect("timeUp", 0.6);
+      if (!teacherPreviewMode) recordStudentActivity(player, "game-finish", { cityId: activeCity.id, roundIndex: g.roundIndex, title: roundInfo[g.roundIndex].title, passed: false, correct: g.correctAnswers, total: g.total, score: g.points, timedOut: false }, progressRef.current);
       return;
     }
-    if (g.removed.includes(option.value)) return;
-    playEffect("click", 0.3);
-    const removed = [...g.removed, option.value];
-    const wrongTotal = g.options.filter((o) => !o.correct).length;
-    const cleared = removed.length >= wrongTotal;
-    const next = { ...g, removed, correctAnswers: g.correctAnswers + (cleared ? 1 : 0) };
-    setGame(next); gameRef.current = next;
-    if (!teacherPreviewMode) recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: pair.id, correct: false, completed: false, removedWrongOption: true });
-    if (!cleared) return;
-    if (!teacherPreviewMode) { markMastered(activeCity.id, pair.id); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: pair.id, correct: true, completed: true }); }
-    playEffect("correct", 0.6);
-    if (g.questionIndex >= g.pairs.length - 1) { setTimeout(() => finishRef.current(true), 900); return; }
-    setTimeout(() => {
-      setGame((prev) => {
-        if (!prev || prev.mode !== "review") return prev;
-        const i = prev.questionIndex + 1;
-        const upd = { ...prev, questionIndex: i, options: createQuestionOptions(prev.pairs[i], activeDeck), removed: [] };
-        gameRef.current = upd; return upd;
-      });
-    }, 1100);
+    const outcome = waveOutcome(meteors);
+    if (outcome !== "pending" && !g.waveDone) {
+      next = { ...next, waveDone: true };
+      if (outcome === "success") {
+        next = { ...next, correctAnswers: next.correctAnswers + 1, points: next.points + 20 };
+        playEffect("correct", 0.6);
+        if (!teacherPreviewMode) { markMastered(activeCity.id, pair.id); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: pair.id, correct: true, completed: true }); }
+      }
+      const index = g.questionIndex;
+      setTimeout(() => {
+        const cur = gameRef.current;
+        if (!cur || cur.mode !== "review" || cur.over || cur.questionIndex !== index) return;
+        if (index >= cur.pairs.length - 1) { finishRef.current(true); return; }
+        const i = index + 1; const options = createQuestionOptions(cur.pairs[i], activeDeck);
+        const upd: GameState = { ...cur, questionIndex: i, options, meteors: createMeteors(options), waveDone: false };
+        rushPairFailed.current = false; gameRef.current = upd; setGame(upd);
+      }, 1300);
+    }
+    gameRef.current = next; setGame(next);
   }
+  function hitMeteor(id: string) {
+    const g = gameRef.current;
+    if (!g || g.mode !== "review" || pausedRef.current || g.over || g.waveDone) return;
+    const hit = hitMeteorAt(g.meteors, id);
+    if (!hit.kind) return;
+    if (hit.kind === "destroyed") {
+      playEffect("click", 0.35);
+      if (!teacherPreviewMode) recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: g.pairs[g.questionIndex].id, correct: false, completed: false, removedWrongOption: true });
+      commitRush({ ...g, points: g.points + 10 }, hit.meteors, 0);
+    } else commitRush(g, hit.meteors, 1, "That was the correct synonym! You lost a life — let it fall next time.");
+  }
+  // Game loop: moves the meteors while Review Rush is running (stops when paused, finished or over).
+  useEffect(() => {
+    if (page !== "game" || game?.mode !== "review" || paused || game.over || game.waveDone) return;
+    let last = performance.now();
+    const id = window.setInterval(() => {
+      const now = performance.now(); const dt = Math.min(0.12, (now - last) / 1000); last = now;
+      const g = gameRef.current;
+      if (!g || g.mode !== "review" || g.over || g.waveDone || pausedRef.current) { last = now; return; }
+      const step = stepMeteors(g.meteors, dt);
+      if (step.missed) commitRush(g, step.meteors, step.missed, step.missed > 1 ? `${step.missed} wrong meteors reached the ground. You lost ${step.missed} lives.` : "A wrong meteor reached the ground. You lost a life.");
+      else commitRush(g, step.meteors, 0);
+    }, 40);
+    return () => window.clearInterval(id);
+    // The loop restarts only when the wave or pause state changes; positions are read from gameRef.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, game?.mode, game?.over, game?.waveDone, game?.questionIndex, paused]);
 
   // ---------- profile ----------
   function selectAlien(id: string) { if (progress.unlockedAliens.includes(id)) { updateProgress((p) => ({ ...p, selectedAlien: id })); playEffect("click", 0.2); } }
@@ -515,41 +554,51 @@ export default function Home() {
   }
 
   // ---------- teacher ----------
+  async function accessToken(): Promise<string | null> {
+    if (!supabase) return null;
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || null;
+  }
   async function reloadTeacherRows() {
-    const { rows, comments, notice: n } = await loadTeacherData();
+    const { rows, comments, notice: n } = await loadTeacherData(await accessToken());
     setTeacherRows(rows); setTeacherComments(comments); if (n) showNotice(n);
   }
+  /** Asks the server whether the signed-in account is the teacher (never decided in the browser). */
+  const checkTeacherAccess = useCallback(async (announce: boolean) => {
+    setTeacherAuthError("");
+    if (!supabase || player?.storageMode !== "supabase") { setTeacherAuthorized(false); return false; }
+    try {
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (!token) { setTeacherAuthorized(false); return false; }
+      const r = await fetch("/api/teacher-auth", { method: "GET", cache: "no-store", headers: { Authorization: `Bearer ${token}` } });
+      const result = await r.json().catch(() => ({}));
+      setTeacherAccessConfigured(result.configured !== false);
+      const isTeacher = r.ok && result.teacher === true;
+      setTeacherAuthorized(isTeacher);
+      if (isTeacher && announce) showNotice("Teacher Mode is on: all 12 cities and 60 missions are open for testing. Nothing you do here changes student progress.");
+      return isTeacher;
+    } catch { setTeacherAuthorized(false); setTeacherAuthError("Could not contact the teacher access service."); return false; }
+  }, [player?.storageMode, showNotice]);
+  // Re-check whenever a different account signs in.
+  useEffect(() => {
+    if (!player?.authUserId) return;
+    const id = window.setTimeout(() => void checkTeacherAccess(true), 0);
+    return () => window.clearTimeout(id);
+  }, [player?.authUserId, checkTeacherAccess]);
   async function openTeacherDashboard() {
-    setTeacherAuthError("");
-    try {
-      const r = await fetch("/api/teacher-auth", { method: "GET", cache: "no-store" });
-      const result = await r.json().catch(() => ({}));
-      setTeacherAccessConfigured(result.configured !== false);
-      if (r.ok && result.authenticated) { setTeacherAuthorized(true); setPage("teacher"); await reloadTeacherRows(); }
-      else { setTeacherAuthorized(false); setPage("teacher-login"); if (result.configured === false) setTeacherAuthError("Teacher access is not configured yet. Add TEACHER_DASHBOARD_PASSWORD and TEACHER_DASHBOARD_SECRET in Vercel, then redeploy."); }
-    } catch { setTeacherAuthorized(false); setPage("teacher-login"); setTeacherAuthError("Could not contact the teacher sign-in service."); }
+    const ok = teacherAuthorized || await checkTeacherAccess(false);
+    if (ok) { setPage("teacher"); await reloadTeacherRows(); }
+    else setPage("teacher-login");
   }
-  async function teacherLogin(password: string) {
-    setTeacherAuthError("");
-    try {
-      const r = await fetch("/api/teacher-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password }) });
-      const result = await r.json().catch(() => ({}));
-      setTeacherAccessConfigured(result.configured !== false);
-      if (!r.ok || !result.authenticated) throw new Error(result.error || "Teacher authentication failed.");
-      setTeacherAuthorized(true); setPage("teacher"); await reloadTeacherRows(); showNotice("Teacher dashboard unlocked for this session.");
-    } catch (err: unknown) { setTeacherAuthError(err instanceof Error ? err.message : "Teacher authentication failed."); }
-  }
-  async function teacherLogout() {
-    try { await fetch("/api/teacher-auth", { method: "DELETE" }); } catch { /* ignore */ }
-    setTeacherAuthorized(false); setTeacherPreviewMode(false); setPage(player ? "hub" : "welcome");
-  }
-  function startTeacherTest(cityId: string) { setTeacherPreviewMode(true); setActiveCityId(cityId); setGame(null); setGameResult(null); setPage("city"); playCityMusic(cityId); }
-  function exitTeacherTest() { setTeacherPreviewMode(false); stopMusic(); setPage("teacher"); void reloadTeacherRows(); }
+  function teacherLogout() { setPage(player ? "hub" : "welcome"); }
+  function startTeacherTest(cityId: string) { if (!teacherAuthorized) return; setActiveCityId(cityId); setGame(null); setGameResult(null); setPage("city"); playCityMusic(cityId); }
+  function exitTeacherTest() { stopMusic(); setPage("teacher"); void reloadTeacherRows(); }
 
   function navigate(dest: "learn" | "profile" | "passport" | "revisit" | "how" | "teacher" | "exit") {
     playEffect("click", 0.18);
-    if (dest !== "learn" && dest !== "exit") stopMusic();
-    if (dest === "learn") { stopMusic(); go("hub"); }
+    if (musicTrack === "review") stopMusic();
+    if (dest === "learn") go("hub");
     else if (dest === "profile") go("profile");
     else if (dest === "passport") go("passport");
     else if (dest === "revisit") go("revisit");
@@ -563,11 +612,12 @@ export default function Home() {
     game, gameResult, timeLeft, paused, audio, teacherPreviewMode, teacherAuthorized, teacherAccessConfigured, teacherAuthError, teacherRows, teacherComments,
     go, navigate, showNotice, clearAuthMessages,
     register: (e) => void register(e), login: (e) => void login(e), loginWithGoogle: () => void loginWithGoogle(), startAsGuest, logout: () => void logout(),
-    enterCity, openCityOfSynonyms, startGame, leaveGame, togglePause, chooseMatchLeft, chooseMatchRight, setGameInput, submitAnswer, nextQuestion, removeReviewRock,
+    enterCity, openCityOfSynonyms, startGame, leaveGame, togglePause, chooseMatchLeft, chooseMatchRight, setGameInput, submitAnswer, nextQuestion, hitMeteor,
     markMastered, addMiss, selectAlien, equipAccessory, buyAccessory, saveBio, resetProgress,
-    setAudio, playEffect, playWelcomeMusic: () => { if (sound().currentMusic === AUDIO.lewtaTheme) sound().stopMusic(); else sound().playMusic(AUDIO.lewtaTheme, 0.25); },
-    isMusicPlaying: () => Boolean(sound().currentMusic),
-    openTeacherDashboard: () => void openTeacherDashboard(), teacherLogin: (p) => void teacherLogin(p), teacherLogout: () => void teacherLogout(),
+    setAudio, playEffect, musicTrack,
+    chooseTrack: (track) => { if (track === "lewta" || progress.unlockedCities.includes(track) || teacherPreviewMode) { if (audio.muted) setAudio({ muted: false }); playTrack(track); } },
+    toggleMusic: () => { if (musicTrack) stopMusic(); else { if (audio.muted) setAudio({ muted: false }); playTrack(lastTrack.current || "lewta"); } },
+    openTeacherDashboard: () => void openTeacherDashboard(), teacherLogout,
     reloadTeacherRows: () => void reloadTeacherRows(), startTeacherTest, exitTeacherTest,
   };
   return <LewtaContext.Provider value={api}><AppShell notice={notice} onCloseNotice={() => setNotice("")} /></LewtaContext.Provider>;

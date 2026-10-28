@@ -1,0 +1,84 @@
+/* Additions to the V10 design for features the prototype did not draw. Same palette as v10.css. */
+img { height: auto; }
+.brand img { height: auto; }
+button:disabled { cursor: not-allowed; }
+
+/* Notifications */
+.lewta-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 10001; display: flex; align-items: center; gap: 10px;
+  background: #fff; color: #11234c; border: 2px solid #ff2595; border-radius: 16px; padding: 12px 14px; max-width: min(620px, calc(100vw - 24px)); box-shadow: 0 12px 30px #0008; font-weight: 700; }
+.lewta-toast p { margin: 0; }
+.lewta-toast button { border: 0; background: #ffe3f1; color: #b0175f; border-radius: 50%; width: 28px; height: 28px; flex: none; }
+
+/* Forms (Create Account / Sign In) */
+.auth select.auth-select { width: 100%; border: 1px solid #7a8abf; background: #f7f8ff; color: #101b44; border-radius: 12px; padding: 14px; }
+.auth .auth-error, .teacher-login .auth-error { background: #5a1830; border: 1px solid #ff7a9a; color: #ffd8e2 !important; border-radius: 12px; padding: 10px; text-align: left; }
+.teacher-login .auth-error { color: #8d1d3c !important; background: #ffe3ea; }
+.auth .auth-ok { background: #10473a; border: 1px solid #5fe0b5; color: #d6fff1 !important; border-radius: 12px; padding: 10px; text-align: left; }
+.link-btn { background: none; border: 0; color: #55ddff; font-weight: 800; text-decoration: underline; padding: 0; }
+.google-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* Soundtrack bar: volume */
+.music-select .volume-range { width: 110px; accent-color: #ff2595; }
+
+/* Game panels */
+.question h2 .blank-line { display: inline-block; min-width: 90px; border-bottom: 3px solid #ffc34d; color: transparent; margin: 0 4px; }
+.choices button.picked { background: #ff2995; border-color: #ff8fc9; }
+.choices button.right { background: #138a62; border-color: #5fe0b5; }
+.choices button.wrong { background: #8d1d3c; border-color: #ff7a9a; }
+.choices button.matched { background: #1d5a4a; border-color: #5fe0b5; opacity: .45; }
+.choices button:disabled { cursor: default; }
+.match-board { align-items: start; }
+.match-col { display: flex; flex-direction: column; gap: 10px; }
+.type-answer { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+.type-answer input { flex: 1; min-width: 200px; padding: 14px; border-radius: 12px; border: 1px solid #7a8abf; background: #f7f8ff; color: #101b44; font-size: 16px; }
+.feedback-note { color: #c5d4ff; font-size: 13px; }
+.question > .btn { margin-top: 12px; }
+.rush-context { color: #c5d4ff; font-style: italic; font-size: 14px; }
+.meteor-word:disabled { cursor: default; }
+
+/* Results */
+.unlock-panel { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 20px; text-align: center; border-color: #ff6db4; }
+.unlock-panel > div { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.result-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 22px; }
+
+/* City, profile, revisit, teacher */
+.teacher-test-note { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 18px; }
+.profile-reset { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.tile .btn.ghost { padding: 8px 14px; font-size: 13px; }
+.revisit-city select { min-width: 220px; }
+.teacher-search { width: 100%; max-width: 420px; padding: 11px; border-radius: 10px; border: 1px solid #7191d9; margin: 6px 0 12px; }
+.word-table > div.row-selected { background: #2a3d7a; border-radius: 8px; }
+.word-table > div[role="button"] { cursor: pointer; }
+.panel label { font-weight: 700; }
+@media (max-width: 700px) {
+  .lewta-toast { bottom: 76px; left: 12px; right: 12px; transform: none; }
+  .music-select .volume-range { width: 100%; }
+}
+
+/* V10 sidebar portrait fills the sidebar width */
+.teacher img{width:100%;height:auto;display:block}
+
+/* ---------- Review Rush: transparent play area + state-driven falling meteors ---------- */
+.rush-demo .question { background: #0b173b66; backdrop-filter: blur(1.5px); }
+.rush-demo .meteor-field { --meteor-h: 58px; background: transparent; border: 2px solid #8fa8ffaa; box-shadow: inset 0 -26px 30px -18px #ffd27a55; touch-action: manipulation; }
+.rush-demo .meteor-field::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 5px; background: linear-gradient(90deg, #ff52aa, #ffd27a, #78e9ff); opacity: .8; }
+.rush-demo .meteor-word { animation: none; width: 22%; min-height: var(--meteor-h); display: flex; align-items: center; justify-content: center; text-align: center;
+  line-height: 1.15; padding: 8px 10px; border-radius: 999px; transition: top 40ms linear, transform .2s, opacity .35s; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; }
+.rush-demo .meteor-word.falling { cursor: crosshair; }
+.rush-demo .meteor-word.falling:hover { transform: scale(1.05); }
+.rush-demo .meteor-word:disabled { cursor: default; }
+.rush-demo .meteor-word.destroyed { animation: meteor-boom .45s ease-out forwards; pointer-events: none; }
+.rush-demo .meteor-word.landed { background: #ffdc79; border-color: #ff9f24; box-shadow: 0 0 24px #ffd27a; }
+.rush-demo .meteor-word.missed { background: #ffc3c3; border-color: #ff5b5b; opacity: .75; }
+.rush-demo .meteor-word.lost { animation: meteor-boom .45s ease-out forwards; background: #ffc3c3; pointer-events: none; }
+@keyframes meteor-boom { 0% { transform: scale(1); opacity: 1; filter: brightness(1.6); } 60% { transform: scale(1.35) rotate(-6deg); opacity: .7; } 100% { transform: scale(.4); opacity: 0; } }
+.rush-overlay { position: absolute; inset: 0; z-index: 5; display: grid; place-content: center; gap: 8px; text-align: center; background: #050c26aa; padding: 16px; }
+.rush-overlay b { font-size: 26px; color: #ffdc79; letter-spacing: 1px; }
+.rush-overlay.game-over b { font-size: 34px; color: #ff52aa; }
+.rush-overlay .result-actions { justify-content: center; }
+.rush-lives { white-space: nowrap; }
+@media (max-width: 650px) {
+  .rush-demo .meteor-field { --meteor-h: 64px; }
+  .rush-demo .meteor-word { font-size: 12px; padding: 6px 5px; }
+}
+.rush-demo .question { scroll-margin-top: 72px; }
