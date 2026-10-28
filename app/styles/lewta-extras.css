@@ -82,3 +82,4 @@ button:disabled { cursor: not-allowed; }
   .rush-demo .meteor-word { font-size: 12px; padding: 6px 5px; }
 }
 .rush-demo .question { scroll-margin-top: 72px; }
+.confirm-note { background: #fff3b622; border: 1px solid #ffe181; color: #ffe9a8; border-radius: 12px; padding: 10px 12px; font-size: 13px; line-height: 1.35; margin: 8px 0; text-align: left; }

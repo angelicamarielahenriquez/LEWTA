@@ -247,7 +247,7 @@ export default function Home() {
       const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName, username, promotion } } });
       if (error) throw new Error(error.message);
       if (!data.user) throw new Error("Supabase did not return a user. Please try again.");
-      if (!data.session) { setAuthMessage("Your account was created. Please check your email to confirm it, then come back and log in."); setPage("login"); return; }
+      if (!data.session) { setAuthMessage("✅ Your account was created! Open the confirmation email and click the link. Then come back to THIS page and sign in below with your email and password. (If the link opens a grey error page, that is OK — your account is already confirmed.)"); setPage("login"); return; }
       await enterAccount(data.user, null, true);
       setActiveCityId("new-york"); playEffect("levelUp"); showNotice(`Welcome to LEWTA, ${firstName}! Your progress will be saved to your account.`);
     } catch (err: unknown) { setAuthError(err instanceof Error ? err.message : "We couldn't create your account. Please try again."); }

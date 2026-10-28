@@ -28,6 +28,7 @@ export function AuthScreen({ kind }: { kind: "register" | "login" }) {
       {sign && <><label htmlFor="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} placeholder="Type your password again" /></>}
       {authError && <p className="auth-error" role="alert">{authError}</p>}
       {authMessage && <p className="auth-ok" role="status">{authMessage}</p>}
+      {sign && <p className="confirm-note">📧 After you create your account, open the confirmation email and click the link. Then <b>come back to this page</b> and sign in with your email and password.</p>}
       <button className="btn" disabled={busy || !isSupabaseConfigured}>{busy ? "PLEASE WAIT…" : sign ? "CREATE ACCOUNT" : "SIGN IN"} 🚀</button>
       <button type="button" className="btn ghost back" onClick={() => go("welcome")}>← Back to Welcome</button>
       <p>{sign ? <>Already registered? <button type="button" className="link-btn" onClick={() => go("login")}>Sign in</button></> : <>New to LEWTA? <button type="button" className="link-btn" onClick={() => go("register")}>Create an account</button></>}</p>
