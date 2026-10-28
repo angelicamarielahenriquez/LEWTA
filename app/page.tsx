@@ -56,7 +56,8 @@ export default function Home() {
   const [teacherAccessConfigured, setTeacherAccessConfigured] = useState(true);
   const [teacherAuthError, setTeacherAuthError] = useState("");
   /** Teacher Mode = the server confirmed this signed-in account is the teacher. It unlocks everything for testing and never saves progress. */
-  const teacherPreviewMode = teacherAuthorized;
+  // Only a signed-in account can be in Teacher Mode; a guest never is (even in the same browser tab).
+  const teacherPreviewMode = teacherAuthorized && player?.storageMode === "supabase";
 
   const audioRef = useRef<AudioController | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -299,6 +300,8 @@ export default function Home() {
       localStorage.setItem(`lewta_profile_${username}`, JSON.stringify({ firstName, lastName, username, promotion: "Guest", role: "guest", guestId, sessionId }));
     } catch { /* guest mode still works in memory */ }
     recordStudentActivity(guest, "session-start", { firstName, lastName });
+    // Starting a guest game always closes any teacher session that was open in this browser.
+    if (teacherAuthorized) { setTeacherAuthorized(false); setTeacherRows([]); void fetch("/api/teacher-auth", { method: "DELETE" }).catch(() => undefined); }
     setPlayer(guest); setProgress(next); setActiveCityId("new-york"); setPage("hub"); clearAuthMessages();
     showNotice(`Welcome, ${firstName}! Your guest progress is saved on this device.`);
     playEffect("click", 0.28);
@@ -629,7 +632,7 @@ export default function Home() {
 
   const api: LewtaApi = {
     page, player, progress, busy, authError, authMessage, guestFormError, activeCity, activeDeck, roundDone, selectedAlien, equipped,
-    game, gameResult, timeLeft, paused, audio, teacherPreviewMode, teacherAuthorized, teacherAccessConfigured, teacherAuthError, teacherRows, teacherComments,
+    game, gameResult, timeLeft, paused, audio, teacherPreviewMode, teacherAuthorized: teacherPreviewMode, teacherAccessConfigured, teacherAuthError, teacherRows, teacherComments,
     go, navigate, showNotice, clearAuthMessages,
     register: (e) => void register(e), login: (e) => void login(e), loginWithGoogle: () => void loginWithGoogle(), startAsGuest, logout: () => void logout(),
     enterCity, openCityOfSynonyms, startGame, leaveGame, togglePause, chooseMatchLeft, chooseMatchRight, setGameInput, submitAnswer, nextQuestion, hitMeteor,
