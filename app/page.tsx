@@ -576,6 +576,7 @@ export default function Home() {
       setTeacherAccessConfigured(result.configured !== false);
       const isTeacher = r.ok && result.teacher === true;
       setTeacherAuthorized(isTeacher);
+      if (!isTeacher && result.error) setTeacherAuthError(String(result.error));
       if (isTeacher && announce) showNotice("Teacher Mode is on: all 12 cities and 60 missions are open for testing. Nothing you do here changes student progress.");
       return isTeacher;
     } catch { setTeacherAuthorized(false); setTeacherAuthError("Could not contact the teacher access service."); return false; }

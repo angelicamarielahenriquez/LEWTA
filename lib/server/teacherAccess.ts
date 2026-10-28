@@ -31,14 +31,19 @@ export async function checkTeacher(authorization: string | null): Promise<Teache
   if (!token) return { ok: false, status: 401, configured: true, error: "Sign in with your teacher account first." };
   const { data, error } = await admin.auth.getUser(token);
   const user = data?.user;
-  if (error || !user) return { ok: false, status: 401, configured: true, error: "Your sign-in expired. Please log in again." };
+  if (error || !user) {
+    console.warn("[teacher-access] token rejected by Supabase:", error?.status, error?.message);
+    return { ok: false, status: 401, configured: true, error: "Your sign-in expired. Please log in again." };
+  }
   const email = String(user.email || "").toLowerCase();
   const verified = Boolean(user.email_confirmed_at || user.confirmed_at);
   let teacher = verified && email !== "" && teacherEmails().includes(email);
   if (!teacher) {
-    const { data: profile } = await admin.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    const { data: profile, error: profileError } = await admin.from("profiles").select("role").eq("id", user.id).maybeSingle();
+    if (profileError) console.warn("[teacher-access] profile lookup failed:", profileError.message);
     teacher = profile?.role === "teacher";
   }
+  if (!teacher) console.warn("[teacher-access] not a teacher:", { listed: teacherEmails().length, emailListed: teacherEmails().includes(email), verified });
   if (!teacher) return { ok: false, status: 403, configured: true, error: "This account does not have teacher access." };
   return { ok: true, userId: user.id, email, admin };
 }
