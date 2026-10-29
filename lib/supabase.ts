@@ -29,13 +29,18 @@ export const supabase = isSupabaseConfigured
  * The Google button is only shown when it is, so students never see a button that fails.
  */
 export async function isGoogleSignInEnabled(): Promise<boolean> {
-  if (!isSupabaseConfigured) return false;
+  return (await authSettings()).google;
+}
+
+/** Public sign-in settings: is Google on, and are new accounts confirmed automatically (no e-mail needed)? */
+export async function authSettings(): Promise<{ google: boolean; autoConfirm: boolean }> {
+  if (!isSupabaseConfigured) return { google: false, autoConfirm: false };
   try {
     const r = await fetch(`${projectUrl}/auth/v1/settings`, { headers: { apikey: publishableKey }, cache: "no-store" });
-    if (!r.ok) return false;
-    const settings = (await r.json()) as { external?: { google?: boolean } };
-    return settings.external?.google === true;
+    if (!r.ok) return { google: false, autoConfirm: false };
+    const settings = (await r.json()) as { external?: { google?: boolean }; mailer_autoconfirm?: boolean };
+    return { google: settings.external?.google === true, autoConfirm: settings.mailer_autoconfirm === true };
   } catch {
-    return false;
+    return { google: false, autoConfirm: false };
   }
 }

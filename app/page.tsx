@@ -245,7 +245,7 @@ export default function Home() {
       if (password.length < 8) throw new Error("Use a password with at least 8 characters.");
       if (password !== confirm) throw new Error("Your passwords do not match.");
       const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName, username, promotion } } });
-      if (error) throw new Error(error.message);
+      if (error) throw new Error(/rate limit/i.test(error.message) ? "Too many new accounts were created in a short time. Please wait a few minutes and try again, or continue as a guest for now." : error.message);
       if (!data.user) throw new Error("Supabase did not return a user. Please try again.");
       if (!data.session) { setAuthMessage("✅ Your account was created! Open the confirmation email and click the link. Then come back to THIS page and sign in below with your email and password. (If the link opens a grey error page, that is OK — your account is already confirmed.)"); setPage("login"); return; }
       await enterAccount(data.user, null, true);

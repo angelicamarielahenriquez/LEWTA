@@ -5,7 +5,7 @@ import { useLewta } from "@/components/LewtaContext";
 import { alienImage } from "@/lib/assets";
 import { promotions } from "@/lib/gameData";
 import { PasswordInput } from "@/components/ui/PasswordInput";
-import { isGoogleSignInEnabled, isSupabaseConfigured } from "@/lib/supabase";
+import { authSettings, isSupabaseConfigured } from "@/lib/supabase";
 
 /** V10 Create Account / Sign In card, connected to Supabase (email and Google). */
 export function AuthScreen({ kind }: { kind: "register" | "login" }) {
@@ -13,7 +13,8 @@ export function AuthScreen({ kind }: { kind: "register" | "login" }) {
   const sign = kind === "register";
   // The Google button appears only once Google sign-in is switched on in Supabase.
   const [googleOn, setGoogleOn] = useState(false);
-  useEffect(() => { let alive = true; void isGoogleSignInEnabled().then((on) => { if (alive) setGoogleOn(on); }); return () => { alive = false; }; }, []);
+  const [needsEmail, setNeedsEmail] = useState(true); // false when Supabase confirms new accounts automatically
+  useEffect(() => { let alive = true; void authSettings().then((s) => { if (alive) { setGoogleOn(s.google); setNeedsEmail(!s.autoConfirm); } }); return () => { alive = false; }; }, []);
   return <div className="form-page">
     <form className="auth" onSubmit={sign ? register : login}>
       <Image src={alienImage(sign ? "luna" : "ziggy")} alt="" width={110} height={110} />
@@ -33,7 +34,7 @@ export function AuthScreen({ kind }: { kind: "register" | "login" }) {
       {sign && <><label htmlFor="confirmPassword">Confirm password</label><PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" required minLength={8} placeholder="Type your password again" /></>}
       {authError && <p className="auth-error" role="alert">{authError}</p>}
       {authMessage && <p className="auth-ok" role="status">{authMessage}</p>}
-      {sign && <p className="confirm-note">📧 After you create your account, open the confirmation email and click the link. Then <b>come back to this page</b> and sign in with your email and password.</p>}
+      {sign && needsEmail && <p className="confirm-note">📧 After you create your account, open the confirmation email and click the link. Then <b>come back to this page</b> and sign in with your email and password.</p>}
       <button className="btn" disabled={busy || !isSupabaseConfigured}>{busy ? "PLEASE WAIT…" : sign ? "CREATE ACCOUNT" : "SIGN IN"} 🚀</button>
       <button type="button" className="btn ghost back" onClick={() => go("welcome")}>← Back to Welcome</button>
       <p>{sign ? <>Already registered? <button type="button" className="link-btn" onClick={() => go("login")}>Sign in</button></> : <>New to LEWTA? <button type="button" className="link-btn" onClick={() => go("register")}>Create an account</button></>}</p>
