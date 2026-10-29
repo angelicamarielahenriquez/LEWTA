@@ -163,3 +163,23 @@ button:disabled { cursor: not-allowed; }
 .lw-exhaust i { width: 18px; height: 18px; background: radial-gradient(circle, #fff 0 25%, #ff9cc8 55%, #ff2e8300 75%); }
 .passport button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
 .passport-tip { font-size: 12px; color: #9fb3ff; margin: -4px 0 6px; }
+
+/* ---------- Phone menu (☰ dropdown) — replaces the old bottom bar; desktop keeps the sidebar ---------- */
+.mobile-nav { display: none !important; }
+.mobile-menu { display: none; position: relative; }
+@media (max-width: 700px) {
+  main { padding-bottom: 28px; }
+  .top { position: sticky; top: 0; z-index: 30; }
+  .mobile-menu { display: block; }
+  .mobile-menu-btn { width: 44px; height: 44px; border-radius: 12px; border: 1px solid #5b72c6; background: #13265d; display: grid; place-content: center; gap: 5px; cursor: pointer; padding: 0; }
+  .mobile-menu-btn span { display: block; width: 22px; height: 3px; border-radius: 3px; background: #fff; transition: transform .2s, opacity .2s; }
+  .mobile-menu-btn.open { background: #ff2b97; border-color: #ff8cc8; }
+  .mobile-menu-btn.open span:nth-child(1) { transform: translateY(8px) rotate(45deg); }
+  .mobile-menu-btn.open span:nth-child(2) { opacity: 0; }
+  .mobile-menu-btn.open span:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
+  .mobile-menu-list { position: absolute; right: 0; top: calc(100% + 10px); width: min(84vw, 300px); max-height: calc(100dvh - 90px); overflow-y: auto; background: linear-gradient(160deg, #13265d, #24164c); border: 2px solid #6d7fd0; border-radius: 18px; padding: 8px; box-shadow: 0 18px 40px #000b; display: flex; flex-direction: column; gap: 4px; z-index: 40; }
+  .mobile-menu-list button { display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 8px 14px; border: 0; border-radius: 12px; background: transparent; color: #eef2ff; font: 700 16px Trebuchet MS, Arial, sans-serif; text-align: left; cursor: pointer; }
+  .mobile-menu-list button img { width: 30px; height: 30px; object-fit: contain; }
+  .mobile-menu-list button.active { background: #ff2b97; color: #fff; }
+  .mobile-menu-list button:not(.active):active { background: #2a3f86; }
+}

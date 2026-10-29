@@ -132,3 +132,30 @@ export function buildRoundPairs(cityId: string, roundIndex: number, missedIds: n
   }
   return pairs.length ? pairs : deck.slice(0, 10);
 }
+
+const ALL_PAIRS: Pair[] = Object.values(cityDecks).flat();
+
+/**
+ * Context Match hint: a clue that never shows the expected answer, nor the word that was taken out
+ * of the sentence. It offers another synonym from the LEWTA word lists ("Think of a synonym for …"),
+ * and only when no other synonym exists it gives the meaning in Spanish plus the first letter.
+ */
+export function contextHint(pair: Pair): string {
+  const answer = normalizeAnswer(pair.b);
+  const hidden = normalizeAnswer(pair.a);
+  const display = new Map<string, string>();
+  for (const p of ALL_PAIRS) { display.set(normalizeAnswer(p.a), p.a); display.set(normalizeAnswer(p.b), p.b); }
+  // Only words that are paired DIRECTLY with the answer (or with the hidden word) in the LEWTA lists,
+  // so the clue keeps the same meaning (long synonym chains drift to other meanings).
+  const neighbours = (w: string) => ALL_PAIRS.flatMap((p) => (normalizeAnswer(p.a) === w ? [normalizeAnswer(p.b)] : normalizeAnswer(p.b) === w ? [normalizeAnswer(p.a)] : []));
+  const ok = (w: string) => [answer, hidden].every((x) => w !== x && !w.includes(x) && !x.includes(w));
+  const byLength = (x: string, y: string) => x.split(" ").length - y.split(" ").length || x.localeCompare(y);
+  const others = [...new Set(neighbours(answer).filter(ok).sort(byLength)), ...new Set(neighbours(hidden).filter(ok).sort(byLength))];
+  if (others.length) return `Think of a synonym for “${display.get(others[0]) || others[0]}”. The word you need has a similar meaning.`;
+  const letters = pair.b.replace(/[^A-Za-z]/g, "").length;
+  const words = pair.b.trim().split(/\s+/).length;
+  const shape = `It starts with “${pair.b.trim()[0].toLowerCase()}” and has ${letters} letters${words > 1 ? ` (${words} words)` : ""}.`;
+  const spanish = normalizeAnswer(pair.spanish || "");
+  const spanishGivesItAway = !spanish || [answer, hidden].some((w) => spanish === w || spanish.includes(w) || w.includes(spanish));
+  return spanishGivesItAway ? shape : `It means “${pair.spanish}” in Spanish. ${shape}`;
+}

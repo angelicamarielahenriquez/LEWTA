@@ -20,7 +20,7 @@ import type { VisitorComment } from "@/lib/comments";
 import type { GameMode, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
 
 const freshGame = (mode: GameMode, roundIndex: number, pairs: Pair[]): GameState => ({
-  mode, roundIndex, pairs, matched: [], leftCards: shuffle(pairs), rightCards: shuffle(pairs), selectedLeft: null, selectedRight: null,
+  mode, roundIndex, pairs, matched: [], leftCards: shuffle(pairs), rightCards: shuffle(pairs), selectedLeft: null, selectedRight: null, mismatch: false,
   questionIndex: 0, options: [], input: "", answered: false, answerCorrect: null, chosenValue: "", removed: [], hearts: 3, mistakes: 0,
   correctAnswers: 0, elapsed: 0, total: pairs.length, meteors: [], waveDone: false, over: false, points: 0,
 });
@@ -434,28 +434,36 @@ export default function Home() {
     const i = g.questionIndex + 1;
     setGame((prev) => (prev ? { ...prev, questionIndex: i, options: createQuestionOptions(prev.pairs[i], activeDeck), input: "", answered: false, answerCorrect: null, chosenValue: "", elapsed: prev.elapsed + 1 } : prev));
   }
-  function chooseMatchLeft(pairId: number) {
-    if (!game || game.matched.includes(pairId)) return;
-    setGame((prev) => (prev ? { ...prev, selectedLeft: pairId } : prev)); playEffect("click", 0.18);
-  }
-  function chooseMatchRight(pairId: number) {
-    const g = game;
-    if (!g || g.matched.includes(pairId) || g.selectedLeft === null) return;
-    const left = g.selectedLeft;
-    if (left === pairId) {
-      const matched = [...g.matched, pairId];
-      const next = { ...g, matched, selectedLeft: null, selectedRight: null };
+  // Learn & Match / Speed Match: pick a word on either side, click it again to unselect it,
+  // or click another word on the same side to change the choice. Two picked words are then checked.
+  function checkMatch(g: GameState, left: number, right: number) {
+    if (left === right) {
+      const matched = [...g.matched, left];
+      const next = { ...g, matched, selectedLeft: null, selectedRight: null, mismatch: false };
       setGame(next); gameRef.current = next;
-      if (!teacherPreviewMode) { markMastered(activeCity.id, pairId); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId, correct: true, completed: true }); }
+      if (!teacherPreviewMode) { markMastered(activeCity.id, left); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: left, correct: true, completed: true }); }
       playEffect("correct", 0.5);
       if (matched.length >= g.pairs.length) setTimeout(() => finishRef.current(true), 450);
-    } else {
-      if (!teacherPreviewMode) { addMiss(activeCity.id, [left]); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: left, correct: false, completed: false }); }
-      playEffect("incorrect", 0.5);
-      setGame((prev) => (prev ? { ...prev, selectedRight: pairId, mistakes: prev.mistakes + 1 } : prev));
-      setTimeout(() => setGame((prev) => (prev ? { ...prev, selectedLeft: null, selectedRight: null } : prev)), 650);
+      return;
     }
+    if (!teacherPreviewMode) { addMiss(activeCity.id, [left]); recordStudentActivity(player, "answer", { cityId: activeCity.id, roundIndex: g.roundIndex, pairId: left, correct: false, completed: false }); }
+    playEffect("incorrect", 0.5);
+    const wrong = { ...g, selectedLeft: left, selectedRight: right, mismatch: true, mistakes: g.mistakes + 1 };
+    setGame(wrong); gameRef.current = wrong;
+    setTimeout(() => setGame((prev) => (prev && prev.mismatch ? { ...prev, selectedLeft: null, selectedRight: null, mismatch: false } : prev)), 650);
   }
+  function chooseMatch(side: "left" | "right", pairId: number) {
+    const g = game;
+    if (!g || g.matched.includes(pairId) || g.mismatch || paused) return;
+    const key = side === "left" ? "selectedLeft" : "selectedRight";
+    if (g[key] === pairId) { setGame({ ...g, [key]: null }); playEffect("click", 0.12); return; } // unselect
+    const left = side === "left" ? pairId : g.selectedLeft;
+    const right = side === "right" ? pairId : g.selectedRight;
+    if (left !== null && right !== null) { checkMatch(g, left, right); return; }
+    setGame({ ...g, [key]: pairId }); playEffect("click", 0.18);
+  }
+  function chooseMatchLeft(pairId: number) { chooseMatch("left", pairId); }
+  function chooseMatchRight(pairId: number) { chooseMatch("right", pairId); }
   // ---------- Review Rush (falling meteors kept in game state) ----------
   const rushPairFailed = useRef(false);
   function commitRush(g: GameState, meteors: Meteor[], livesLost: number, notice?: string) {

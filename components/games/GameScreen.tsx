@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
 import { alienImage } from "@/lib/assets";
 import { roundInfo } from "@/lib/gameData";
-import { sentenceParts } from "@/lib/questions";
+import { contextHint, sentenceParts } from "@/lib/questions";
 import { RUSH_LANES, destroyedCount, waveOutcome, wrongCount } from "@/lib/reviewRush";
 import type { Pair } from "@/types/lewta";
 
@@ -30,6 +30,7 @@ export function GameScreen() {
   const timed = game.mode === "speed" || game.mode === "review" || game.mode === "boss";
   const hintText = isPair
     ? (game.selectedLeft !== null ? (() => { const p = game.pairs.find((x) => x.id === game.selectedLeft); return p ? `“${p.a}” means “${p.spanish}” in Spanish.` : ""; })() : "Choose a word on the left first, then look for the word with the same meaning.")
+    : game.mode === "context" ? contextHint(pair)
     : `“${pair.a}” means “${pair.spanish}” in Spanish.`;
   const actions = <div className="rush-actions">
     <button onClick={() => setHintFor(hintOpen ? "" : key)}>💡 {hintOpen ? "Hide Hint" : "Show Hint"}</button>
@@ -72,13 +73,13 @@ function MatchBoard({ actions, hint }: BoardProps) {
   return <>
     <div className="eyebrow">{game.mode === "speed" ? "SPEED MATCH · BEAT THE CLOCK" : "LEARN & MATCH"}</div>
     <h2>Find the matching pairs</h2>
-    <p>Choose a word on the left, then its synonym on the right.</p>
+    <p>Choose a word and then its synonym. Click a selected word again to unselect it.</p>
     {actions}{hint}
     <div className="choices match-board">
       <div className="match-col">{game.leftCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
-        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedLeft === p.id ? "picked" : ""}`} onClick={() => chooseMatchLeft(p.id)}>{p.a}</button>)}</div>
+        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedLeft === p.id ? (game.mismatch ? "wrong" : "picked") : ""}`} aria-pressed={game.selectedLeft === p.id} onClick={() => chooseMatchLeft(p.id)}>{p.a}</button>)}</div>
       <div className="match-col">{game.rightCards.map((p) => <button key={p.id} disabled={paused || game.matched.includes(p.id)}
-        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedRight === p.id ? "wrong" : ""}`} onClick={() => chooseMatchRight(p.id)}>{p.b}</button>)}</div>
+        className={`${game.matched.includes(p.id) ? "matched" : ""} ${game.selectedRight === p.id ? (game.mismatch ? "wrong" : "picked") : ""}`} aria-pressed={game.selectedRight === p.id} onClick={() => chooseMatchRight(p.id)}>{p.b}</button>)}</div>
     </div>
   </>;
 }

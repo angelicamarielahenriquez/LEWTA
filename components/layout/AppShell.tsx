@@ -2,7 +2,6 @@
 import { useLewta } from "@/components/LewtaContext";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { MobileNav } from "@/components/layout/MobileNav";
 import { MusicSelector } from "@/components/layout/MusicSelector";
 import { WelcomeScreen } from "@/components/screens/WelcomeScreen";
 import { AuthScreen } from "@/components/screens/AuthScreen";
@@ -43,8 +42,8 @@ export function AppShell({ notice, onCloseNotice }: { notice: string; onCloseNot
   return <>
     <div className="stars" aria-hidden="true" />
     {page === "welcome" ? screen : <>
-      <TopBar />
-      {formPage ? screen : <><div className="shell"><Sidebar /><main><MusicSelector />{screen}</main></div><MobileNav /></>}
+      <TopBar menu={!formPage} />
+      {formPage ? screen : <><div className="shell"><Sidebar /><main><MusicSelector />{screen}</main></div></>}
     </>}
     {notice && <div className="lewta-toast" role="status"><span aria-hidden="true">✨</span><p>{notice}</p><button aria-label="Close notification" onClick={onCloseNotice}>✕</button></div>}
   </>;

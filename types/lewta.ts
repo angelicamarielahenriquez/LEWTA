@@ -66,6 +66,8 @@ export type GameState = {
   rightCards: Pair[];
   selectedLeft: number | null;
   selectedRight: number | null;
+  /** Learn & Match / Speed Match: the two picked words did not match (shown red for a moment). */
+  mismatch: boolean;
   questionIndex: number;
   options: GameOption[];
   input: string;

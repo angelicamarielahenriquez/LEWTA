@@ -2,12 +2,13 @@
 import Image from "next/image";
 import { useLewta } from "@/components/LewtaContext";
 import { IMAGES } from "@/lib/assets";
+import { MobileNav } from "@/components/layout/MobileNav";
 
 export const TPT_URL = "https://www.teacherspayteachers.com/store/teacher-angelica";
 export const YOUTUBE_URL = "https://www.youtube.com/@angelicamarielahenriquezva3854/videos";
 
 /** V10 header: logo, tagline, TPT/YouTube, XP / gems / streak pills, home. */
-export function TopBar() {
+export function TopBar({ menu = false }: { menu?: boolean }) {
   const { player, progress, go, navigate } = useLewta();
   return <header className="top">
     <div className="brand" onClick={() => go("welcome")} style={{ cursor: "pointer" }} role="button" tabIndex={0} aria-label="LEWTA welcome screen"
@@ -24,6 +25,7 @@ export function TopBar() {
         <span className="pill">🔥 {progress.streak}</span>
       </>}
       <button className="iconbtn" title="Home" onClick={() => (player ? navigate("learn") : go("welcome"))}>⌂</button>
+      {menu && <MobileNav />}
     </div>
   </header>;
 }
