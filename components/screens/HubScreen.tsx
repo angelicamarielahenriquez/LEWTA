@@ -1,6 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useLewta } from "@/components/LewtaContext";
+import { ResumeCard } from "@/components/screens/ResumeCard";
 import { IMAGES } from "@/lib/assets";
 
 /** V10 "What would you like to learn today?" */
@@ -12,6 +13,7 @@ export function HubScreen() {
     [IMAGES.games.readingLab, "READING LAB", "purple", "Improve reading and comprehension!"],
   ];
   return <>
+    <ResumeCard />
     <div className="hero">
       <div><div className="eyebrow">LEWTA · YOUR ENGLISH UNIVERSE</div><h1>What would you like to <em>learn today?</em></h1><p>Choose a mission, collect rewards, and boost your English!</p></div>
       <Image className="hero-rocket" src={IMAGES.branding.lewtaLogo} alt="" width={200} height={140} />

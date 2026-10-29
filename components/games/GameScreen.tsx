@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
 import { alienImage } from "@/lib/assets";
 import { roundInfo } from "@/lib/gameData";
-import { contextHint, sentenceParts } from "@/lib/questions";
+import { bossHint, contextHint, sentenceParts } from "@/lib/questions";
 import { RUSH_LANES, destroyedCount, waveOutcome, wrongCount } from "@/lib/reviewRush";
 import type { Pair } from "@/types/lewta";
 
@@ -31,6 +31,7 @@ export function GameScreen() {
   const hintText = isPair
     ? (game.selectedLeft !== null ? (() => { const p = game.pairs.find((x) => x.id === game.selectedLeft); return p ? `“${p.a}” means “${p.spanish}” in Spanish.` : ""; })() : "Choose a word on the left first, then look for the word with the same meaning.")
     : game.mode === "context" ? contextHint(pair)
+    : game.mode === "boss" ? bossHint(pair, game.options)
     : `“${pair.a}” means “${pair.spanish}” in Spanish.`;
   const actions = <div className="rush-actions">
     <button onClick={() => setHintFor(hintOpen ? "" : key)}>💡 {hintOpen ? "Hide Hint" : "Show Hint"}</button>
@@ -97,13 +98,15 @@ function Feedback({ pair }: { pair: Pair }) {
 function ContextBoard({ pair, actions, hint }: BoardProps & { pair: Pair }) {
   const { game, setGameInput, submitAnswer } = useLewta();
   if (!game) return null;
+  const parts = sentenceParts(pair);
   return <>
     <div className="eyebrow">CONTEXT MATCH</div>
-    <Sentence pair={pair} />
-    <p>Type the complete synonym that fits the sentence.</p>
+    <h2 className="context-sentence">{parts ? <>{parts.before}<mark className="target-in-sentence">{parts.target}</mark>{parts.after}</> : pair.example}</h2>
+    <div className="target-word-box" aria-live="polite"><span>TARGET WORD</span><strong data-testid="target-word">{pair.a}</strong></div>
+    <p>Write a synonym for the word above that fits the sentence.</p>
     {actions}{hint}
     <form className="type-answer" onSubmit={(e) => { e.preventDefault(); submitAnswer(game.input); }}>
-      <input aria-label="Type the complete synonym" autoComplete="off" autoCapitalize="off" spellCheck={false} placeholder="Type the synonym..." value={game.input} disabled={game.answered} onChange={(e) => setGameInput(e.target.value)} />
+      <input aria-label={`Type a synonym for ${pair.a}`} autoComplete="off" autoCapitalize="off" spellCheck={false} placeholder={`A synonym for “${pair.a}”…`} value={game.input} disabled={game.answered} onChange={(e) => setGameInput(e.target.value)} />
       <button className="pink-action" disabled={game.answered || !game.input.trim()}>Check answer</button>
     </form>
     <Feedback pair={pair} />
@@ -126,7 +129,7 @@ function BossBoard({ pair, actions, hint }: BoardProps & { pair: Pair }) {
 }
 
 function ReviewRush({ pair, actions, hint, score, time }: BoardProps & { pair: Pair; score: number; time: number }) {
-  const { game, hitMeteor, paused, startGame, leaveGame } = useLewta();
+  const { game, hitMeteor, paused, startGame, leaveGame, setRushSpeed } = useLewta();
   const started = game?.questionIndex === 0 && game.points === 0 && game.hearts === 3;
   // On phones, bring the target word and the whole play area into view when Review Rush starts.
   useEffect(() => {
@@ -143,6 +146,11 @@ function ReviewRush({ pair, actions, hint, score, time }: BoardProps & { pair: P
     : `Wrong meteors destroyed: ${destroyed}/${wrongTotal}`;
   return <>
     <div className="rush-status"><span>⭐ Score: {score}</span><span>Question {game.questionIndex + 1} / {game.pairs.length}</span><span>⏱ <b id="demo-timer">{timeText(time)}</b></span><span className="rush-lives" aria-label={`${game.hearts} lives left`}>{"❤️".repeat(Math.max(0, game.hearts))}{"🖤".repeat(Math.max(0, 3 - game.hearts))} {Math.max(0, game.hearts)} lives</span></div>
+    <div className="rush-speed" role="radiogroup" aria-label="Meteor speed">
+      <span>☄️ Speed</span>
+      {[[1, "Normal"], [2, "Fast"], [3, "Extreme"]].map(([n, label]) => <button key={n} role="radio" aria-checked={game.speed === n} className={`speed-${n} ${game.speed === n ? "on" : ""}`} disabled={game.over} onClick={() => setRushSpeed(Number(n))}>
+        <b>{n}×</b><small>{label}</small></button>)}
+    </div>
     <div className="question">
       <div className="eyebrow">TARGET WORD</div>
       <h2>{pair.a}</h2>

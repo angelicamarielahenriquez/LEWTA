@@ -7,6 +7,7 @@
  * - Repairing old saves restores aliens, destinations and city rewards that the student's
  *   completed missions prove they earned, WITHOUT adding XP or gems.
  */
+import { newerSlot, readSlot } from "@/lib/savedGame";
 import { accessories, aliens, cityRewardAccessory, playOrder, replayXp, roundInfo } from "@/lib/gameData";
 import type { Progress } from "@/types/lewta";
 
@@ -91,6 +92,7 @@ export function migrateLegacyProgress(value: unknown): Progress {
     lastActiveDay: typeof v.lastActiveDay === "string" ? v.lastActiveDay : "",
     bio: typeof v.bio === "string" ? v.bio.slice(0, 250) : "",
     updatedAt: typeof v.updatedAt === "string" ? v.updatedAt : undefined,
+    activeGame: readSlot(v.activeGame),
   };
   return reconcileProgress(p).progress;
 }
@@ -127,6 +129,7 @@ export function mergeProgress(a: Progress, b: Progress): Progress {
     unlockedAccessories: uniq([...newer.unlockedAccessories, ...older.unlockedAccessories]),
     bio: newer.bio ?? older.bio ?? "",
     updatedAt: newer.updatedAt || older.updatedAt,
+    activeGame: newerSlot(newer.activeGame, older.activeGame),
   };
   return reconcileProgress(merged).progress;
 }

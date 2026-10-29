@@ -1,4 +1,5 @@
 import type { Meteor } from "@/lib/reviewRush";
+import type { ActiveGameSlot } from "@/lib/savedGame";
 /** Shared LEWTA data types. */
 
 export type Pair = {
@@ -53,6 +54,8 @@ export type Progress = {
   bio?: string;
   /** ISO time of the last change; used to merge progress from different devices safely. */
   updatedAt?: string;
+  /** The game in progress, so the student can continue exactly where they left off. */
+  activeGame?: ActiveGameSlot;
 };
 
 export type GameOption = { value: string; pairId: number; correct: boolean };
@@ -82,6 +85,8 @@ export type GameState = {
   total: number;
   /** Review Rush only: the falling meteors of the current word, the wave state and the score. */
   meteors: Meteor[];
+  /** Review Rush meteor speed: 1 = normal, 2 = fast, 3 = extreme. */
+  speed: number;
   waveDone: boolean;
   over: boolean;
   points: number;

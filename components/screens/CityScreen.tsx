@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { WordList } from "@/components/screens/WordList";
 import { useLewta } from "@/components/LewtaContext";
+import { ResumeCard } from "@/components/screens/ResumeCard";
 import { cityIcon, missionImage } from "@/lib/assets";
 import { cityRewardAccessory, roundInfo } from "@/lib/gameData";
 
@@ -13,6 +14,7 @@ export function CityScreen() {
   const [studyMission, setStudyMission] = useState(0);
   const study = (i: number) => { setStudyMission(i); document.getElementById("word-list")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   return <>
+    <ResumeCard />
     {teacherPreviewMode && <div className="note teacher-test-note"><b>TEACHER TESTING MODE</b> · Student XP, gems and unlocks are not changed. <button className="btn ghost" onClick={exitTeacherTest}>Exit test</button></div>}
     <div className="hero">
       <div><div className="eyebrow">CITY OF SYNONYMS · 12 DESTINATIONS</div><h1>Explore <em>{activeCity.name === "Panama City" ? "Panamá" : activeCity.name}</em></h1><p>Complete missions in order to unlock the next destination!</p></div>

@@ -8,6 +8,7 @@ import type { Alien, Accessory } from "@/lib/gameData";
 import type { AudioSettings } from "@/lib/audio";
 import type { TeacherRow } from "@/lib/teacher";
 import type { VisitorComment } from "@/lib/comments";
+import type { SavedGame } from "@/lib/savedGame";
 import type { City, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
 
 export type ReviewMode = "flashcards" | "multiple" | "typing";
@@ -84,6 +85,11 @@ export type LewtaApi = {
   reloadTeacherRows: () => void;
   startTeacherTest: (cityId: string) => void;
   exitTeacherTest: () => void;
+  // Review Rush speed and "continue where you left off"
+  setRushSpeed: (speed: number) => void;
+  savedGame: SavedGame | null;
+  resumeSavedGame: () => void;
+  discardSavedGame: () => void;
 };
 
 export const LewtaContext = createContext<LewtaApi | null>(null);

@@ -159,3 +159,31 @@ export function contextHint(pair: Pair): string {
   const spanishGivesItAway = !spanish || [answer, hidden].some((w) => spanish === w || spanish.includes(w) || w.includes(spanish));
   return spanishGivesItAway ? shape : `It means “${pair.spanish}” in Spanish. ${shape}`;
 }
+
+/**
+ * Business City Boss hint: never the answer, never an option, never the hidden word, never a letter or position.
+ * Order of clues: a definition (curated questions), another synonym from the LEWTA lists,
+ * a definition taken from the explanation, the Spanish meaning, and finally the topic.
+ */
+export function bossHint(pair: Pair, options: GameOption[]): string {
+  const banned = [...new Set([pair.a, pair.b, ...options.map((o) => o.value)].map(normalizeAnswer))];
+  const clean = (text: string) => !banned.some((w) => new RegExp(`(^|[^a-z])${w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}([^a-z]|$)`, "i").test(text.toLowerCase()));
+  const ok = (w: string) => banned.every((x) => w !== x && !w.includes(x) && !x.includes(w));
+  // 1. A definition: "Purchase means to buy …" → "It means to buy …"
+  const first = (pair.note || "").split(/(?<=\.)\s/)[0] || "";
+  const def = first.match(/\b(?:both\s+)?(?:can\s+)?means?\s+(.+?)\.?$/i)?.[1]?.replace(/\.$/, "");
+  const answer = normalizeAnswer(pair.b); const hidden = normalizeAnswer(pair.a);
+  const neighbours = (w: string) => ALL_PAIRS.flatMap((p) => (normalizeAnswer(p.a) === w ? [normalizeAnswer(p.b)] : normalizeAnswer(p.b) === w ? [normalizeAnswer(p.a)] : []));
+  const syns = [...neighbours(answer), ...neighbours(hidden)].filter(ok).sort((x, y) => x.split(" ").length - y.split(" ").length || x.localeCompare(y));
+  const topic = pair.category ? pair.category.toLowerCase() : "business";
+  const candidates = [
+    ...(pair.businessQuestion && def ? [`The missing word means ${def}.`, `Meaning: ${def}.`] : []),
+    ...syns.flatMap((w) => [`Think of a word with a similar meaning to “${w}”.`, `Similar meaning: “${w}”.`]),
+    ...(def ? [`The missing word means ${def}.`, `Meaning: ${def}.`] : []),
+    ...(pair.spanish && ok(normalizeAnswer(pair.spanish)) ? [`In Spanish, the missing word means “${pair.spanish}”.`, `Spanish: “${pair.spanish}”.`] : []),
+    `The missing word is about ${topic}. Read the whole sentence again.`,
+    `Topic: ${topic}.`,
+    "Read the whole sentence again and think about its meaning.",
+  ];
+  return candidates.find(clean) || "Think about the meaning of the whole sentence.";
+}

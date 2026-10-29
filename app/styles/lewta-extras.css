@@ -222,3 +222,28 @@ button:disabled { cursor: not-allowed; }
   .wl-head span:nth-child(3) { display: none; }
   .wl-es { grid-column: 1 / -1; font-size: 13px; margin-top: -6px; }
 }
+
+/* ---------- Context Match: target word ---------- */
+.context-sentence .target-in-sentence { background: transparent; color: #ffdd70; border-bottom: 3px solid #ffdd70; padding: 0 2px; }
+.target-word-box { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; margin: 4px 0 6px; padding: 10px 18px; border-radius: 14px; background: #ffdd70; color: #16205b; box-shadow: 0 6px 18px #0006; }
+.target-word-box span { font-size: 11px; letter-spacing: 2px; font-weight: 900; color: #6b4a00; }
+.target-word-box strong { font-size: clamp(24px, 3vw, 34px); line-height: 1.1; }
+
+/* ---------- Continue where you left off ---------- */
+.resume-card { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin: 0 0 20px; padding: 16px 20px; border-radius: 20px; background: linear-gradient(110deg, #ff2b97, #8a3ff0); border: 2px solid #ffc2e1; box-shadow: 0 12px 30px #0007; }
+.resume-icon { font-size: 34px; }
+.resume-text { flex: 1 1 260px; display: flex; flex-direction: column; gap: 2px; color: #fff; }
+.resume-text strong { font-size: 20px; }
+.resume-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.resume-actions .btn { margin: 0; }
+.resume-actions .btn:not(.ghost) { background: #ffdd70; color: #16205b; box-shadow: 0 5px 0 #c99a12; }
+.resume-later { background: transparent; border: 0; color: #fff; text-decoration: underline; cursor: pointer; padding: 6px; }
+/* ---------- Review Rush speed selector ---------- */
+.rush-speed { position: relative; z-index: 2; display: flex; align-items: center; gap: 8px; margin: 10px 0 0; flex-wrap: wrap; }
+.rush-speed > span { font-weight: 900; color: #ffdd70; margin-right: 2px; }
+.rush-speed button { display: inline-flex; align-items: baseline; gap: 6px; padding: 7px 13px; border-radius: 999px; border: 1px solid #91a9e3; background: #132452cc; color: #fff; cursor: pointer; touch-action: manipulation; }
+.rush-speed button b { font-size: 16px; }
+.rush-speed button small { font-size: 12px; opacity: .85; }
+.rush-speed button.on { background: #ffdd70; color: #16205b; border-color: #ffdd70; box-shadow: 0 0 14px #ffdd7088; }
+.rush-speed button.speed-3.on { background: #ff2b97; color: #fff; border-color: #ff8cc8; box-shadow: 0 0 14px #ff2b9788; }
+@media (max-width: 650px) { .rush-speed button { padding: 6px 10px; } .rush-speed button small { display: none; } }

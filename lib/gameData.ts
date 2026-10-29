@@ -17,7 +17,7 @@ export type RoundInfo = { title: string; subtitle: string; mode: GameMode; time:
 export const roundInfo: RoundInfo[] = [
   { title: "Learn & Match", subtitle: "Make your first word connections", mode: "match", time: null, reward: 100, gemReward: 2 },
   { title: "Speed Match", subtitle: "Match before the clock runs out", mode: "speed", time: 60, reward: 150, gemReward: 3 },
-  { title: "Context Match", subtitle: "Type the complete synonym that fits the sentence", mode: "context", time: null, reward: 175, gemReward: 3 },
+  { title: "Context Match", subtitle: "Write a synonym for the target word", mode: "context", time: null, reward: 175, gemReward: 3 },
   { title: "Review Rush", subtitle: "Blast the wrong meteors; keep the best synonym", mode: "review", time: 180, reward: 200, gemReward: 4 },
   { title: "Business City Boss", subtitle: "The final challenge: all 80 city pairs", mode: "boss", time: 480, reward: 500, gemReward: 10 },
 ];

@@ -6,8 +6,8 @@ import { roundInfo } from "@/lib/gameData";
 const GUIDE = [
   "Choose a word on the left, then its synonym on the right. Take your time and learn each pair; there is no timer. Use the hint to see the Spanish meaning.",
   "Match words with their synonyms before the timer runs out. Work quickly and accurately; each correct match helps you advance.",
-  "Read the sentence carefully and type the complete synonym that fits the blank. Use context clues rather than guessing.",
-  "Watch words fall like meteors. Remove the incorrect words and let the correct synonym fall safely. Use the hint if you need help, and watch the timer.",
+  "Read the sentence and the target word, then type a complete synonym for it. Use the context to choose the best word.",
+  "Watch words fall like meteors. Click the three wrong words before they land and let the correct synonym land safely. Choose 1×, 2× or 3× speed for an extra challenge.",
   "Complete the final multiple-choice challenge. Read each question and all answer options carefully before choosing your answer.",
 ];
 

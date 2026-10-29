@@ -16,13 +16,14 @@ import { buildRoundPairs, createQuestionOptions, normalizeAnswer, shuffle } from
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { createMeteors, hitMeteor as hitMeteorAt, stepMeteors, waveOutcome, type Meteor } from "@/lib/reviewRush";
 import { loadTeacherData, type TeacherRow } from "@/lib/teacher";
+import { clearedSlot, isSavedGame, makeSavedGame, prepareResume } from "@/lib/savedGame";
 import type { VisitorComment } from "@/lib/comments";
 import type { GameMode, GameResult, GameState, Page, Pair, Player, Progress } from "@/types/lewta";
 
 const freshGame = (mode: GameMode, roundIndex: number, pairs: Pair[]): GameState => ({
   mode, roundIndex, pairs, matched: [], leftCards: shuffle(pairs), rightCards: shuffle(pairs), selectedLeft: null, selectedRight: null, mismatch: false,
   questionIndex: 0, options: [], input: "", answered: false, answerCorrect: null, chosenValue: "", removed: [], hearts: 3, mistakes: 0,
-  correctAnswers: 0, elapsed: 0, total: pairs.length, meteors: [], waveDone: false, over: false, points: 0,
+  correctAnswers: 0, elapsed: 0, total: pairs.length, meteors: [], waveDone: false, over: false, points: 0, speed: 1,
 });
 const sameProgress = (a: Progress, b: Progress) => JSON.stringify({ ...a, updatedAt: "" }) === JSON.stringify({ ...b, updatedAt: "" });
 const stamp = (p: Progress): Progress => ({ ...p, updatedAt: new Date().toISOString() });
@@ -62,6 +63,8 @@ export default function Home() {
   const audioRef = useRef<AudioController | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const gameRef = useRef<GameState | null>(null);
+  /** Review Rush: the current word already cost a life (so it is added to Words to Revisit only once). */
+  const rushPairFailed = useRef(false);
   /** Mirrors `paused` without waiting for a render, so the meteor loop stops on the very next frame. */
   const pausedRef = useRef(false);
   const pausePlay = useCallback((v: boolean) => { pausedRef.current = v; setPaused(v); }, []);
@@ -386,9 +389,10 @@ export default function Home() {
     }
     if (!teacherPreviewMode) recordStudentActivity(player, "game-finish", { cityId, roundIndex: g.roundIndex, title: roundInfo[g.roundIndex].title, passed, correct, total: g.total, score: Math.max(0, correct * 100 - g.mistakes * 10), timedOut }, progressRef.current);
     if (teacherPreviewMode) { showNotice("Teacher testing mode: student progress and rewards were not changed."); }
+    else if (!passed) updateProgress((p) => ({ ...p, activeGame: clearedSlot() }));
     else if (passed) {
       const done = applyMissionComplete(progressRef.current, cityId, g.roundIndex);
-      const next = stamp(done.progress);
+      const next = stamp({ ...done.progress, activeGame: clearedSlot() });
       progressRef.current = next; setProgress(next);
       result = { ...result, xpEarned: done.xpEarned, gemsEarned: done.gemsEarned, replay: done.replay, newCityId: done.newCityId, newAlienId: done.newAlienId, newAccessoryId: done.newAccessoryId };
       const parts: string[] = [];
@@ -465,7 +469,6 @@ export default function Home() {
   function chooseMatchLeft(pairId: number) { chooseMatch("left", pairId); }
   function chooseMatchRight(pairId: number) { chooseMatch("right", pairId); }
   // ---------- Review Rush (falling meteors kept in game state) ----------
-  const rushPairFailed = useRef(false);
   function commitRush(g: GameState, meteors: Meteor[], livesLost: number, notice?: string) {
     const pair = g.pairs[g.questionIndex];
     let next: GameState = { ...g, meteors, hearts: g.hearts - livesLost, mistakes: g.mistakes + livesLost };
@@ -478,6 +481,7 @@ export default function Home() {
     if (next.hearts <= 0) {
       next = { ...next, hearts: 0, over: true };
       gameRef.current = next; setGame(next); playEffect("timeUp", 0.6);
+      updateProgress((p) => ({ ...p, activeGame: clearedSlot() }));
       if (!teacherPreviewMode) recordStudentActivity(player, "game-finish", { cityId: activeCity.id, roundIndex: g.roundIndex, title: roundInfo[g.roundIndex].title, passed: false, correct: g.correctAnswers, total: g.total, score: g.points, timedOut: false }, progressRef.current);
       return;
     }
@@ -520,7 +524,7 @@ export default function Home() {
       const now = performance.now(); const dt = Math.min(0.12, (now - last) / 1000); last = now;
       const g = gameRef.current;
       if (!g || g.mode !== "review" || g.over || g.waveDone || pausedRef.current) { last = now; return; }
-      const step = stepMeteors(g.meteors, dt);
+      const step = stepMeteors(g.meteors, dt * (g.speed || 1));
       if (step.missed) commitRush(g, step.meteors, step.missed, step.missed > 1 ? `${step.missed} wrong meteors reached the ground. You lost ${step.missed} lives.` : "A wrong meteor reached the ground. You lost a life.");
       else commitRush(g, step.meteors, 0);
     }, 40);
@@ -528,6 +532,57 @@ export default function Home() {
     // The loop restarts only when the wave or pause state changes; positions are read from gameRef.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, game?.mode, game?.over, game?.waveDone, game?.questionIndex, paused]);
+
+  // Review Rush speed: 1× normal, 2× fast, 3× extreme (changes the real falling speed).
+  function setRushSpeed(speed: number) {
+    const g = gameRef.current;
+    if (!g || g.mode !== "review" || ![1, 2, 3].includes(speed)) return;
+    const next = { ...g, speed }; gameRef.current = next; setGame(next); playEffect("click", 0.2);
+  }
+
+  // ---------- continue where you left off ----------
+  const savedGame = isSavedGame(progress.activeGame) ? progress.activeGame : null;
+  function resumeSavedGame() {
+    if (!savedGame || teacherPreviewMode) return;
+    const r = prepareResume(savedGame);
+    let game = r.game;
+    if (game.mode === "review" && game.waveDone) {
+      // The last word had already finished: move on to the next one (or finish the mission).
+      if (game.questionIndex >= game.pairs.length - 1) { setActiveCityId(savedGame.cityId); gameRef.current = game; setGame(game); setTimeLeft(r.timeLeft); setPage("game"); setTimeout(() => finishRef.current(true), 50); return; }
+      const i = game.questionIndex + 1; const options = createQuestionOptions(game.pairs[i], cityDecks[savedGame.cityId] || []);
+      game = { ...game, questionIndex: i, options, meteors: createMeteors(options), waveDone: false };
+    }
+    rushPairFailed.current = false;
+    setActiveCityId(savedGame.cityId); setGameResult(null);
+    gameRef.current = game; setGame(game); setTimeLeft(r.timeLeft); pausePlay(r.paused); setPage("game");
+    playCityMusic(savedGame.cityId, game.mode === "review");
+    showNotice(r.paused ? "Welcome back! Your game is paused — press Resume when you are ready." : "Welcome back! Continue where you left off.");
+  }
+  function discardSavedGame() { updateProgress((p) => ({ ...p, activeGame: clearedSlot() })); }
+
+  // Save the game in progress after every answer / match / meteor wave, and every 10 seconds of a timed game.
+  const saveKey = page === "game" && game && !game.over && !teacherPreviewMode && player
+    ? [activeCity.id, game.roundIndex, game.questionIndex, game.matched.length, game.answered ? 1 : 0, game.correctAnswers, game.mistakes, game.hearts, game.waveDone ? 1 : 0, game.points, game.speed, Math.floor(timeLeft / 10)].join("|") : "";
+  useEffect(() => {
+    if (!saveKey) return;
+    const g = gameRef.current;
+    if (!g || g.over) return;
+    updateProgress((p) => ({ ...p, activeGame: makeSavedGame(activeCity.id, g, timeLeft) }));
+    // Only the save key decides when to save (positions are read from gameRef).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saveKey]);
+  // Closing the tab / switching apps: keep an up-to-the-second copy on this device.
+  useEffect(() => {
+    const flush = () => {
+      const g = gameRef.current;
+      if (!g || g.over || !player || teacherPreviewMode || page !== "game") return;
+      const copy = { ...progressRef.current, activeGame: makeSavedGame(activeCity.id, g, timeLeft), updatedAt: new Date().toISOString() };
+      writeLocal(player.storageMode === "supabase" && player.authUserId ? accountCacheKey(player.authUserId) : localProgressKey(player.username), copy);
+    };
+    const hidden = () => { if (document.visibilityState === "hidden") flush(); };
+    window.addEventListener("pagehide", flush); document.addEventListener("visibilitychange", hidden);
+    return () => { window.removeEventListener("pagehide", flush); document.removeEventListener("visibilitychange", hidden); };
+  }, [player, teacherPreviewMode, page, activeCity.id, timeLeft]);
 
   // ---------- profile ----------
   function selectAlien(id: string) { if (progress.unlockedAliens.includes(id)) { updateProgress((p) => ({ ...p, selectedAlien: id })); playEffect("click", 0.2); } }
@@ -650,6 +705,7 @@ export default function Home() {
     toggleMusic: () => { if (musicTrack) stopMusic(); else { if (audio.muted) setAudio({ muted: false }); playTrack(lastTrack.current || "lewta"); } },
     openTeacherDashboard: () => void openTeacherDashboard(), teacherLogin: (p) => void teacherLogin(p), teacherLogout: () => void teacherLogout(),
     reloadTeacherRows: () => void reloadTeacherRows(), startTeacherTest, exitTeacherTest,
+    setRushSpeed, savedGame: teacherPreviewMode ? null : savedGame, resumeSavedGame, discardSavedGame,
   };
   return <LewtaContext.Provider value={api}><AppShell notice={notice} onCloseNotice={() => setNotice("")} /></LewtaContext.Provider>;
 }
