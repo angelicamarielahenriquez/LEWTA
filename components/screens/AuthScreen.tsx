@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
 import { alienImage } from "@/lib/assets";
 import { promotions } from "@/lib/gameData";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { isGoogleSignInEnabled, isSupabaseConfigured } from "@/lib/supabase";
 
 /** V10 Create Account / Sign In card, connected to Supabase (email and Google). */
@@ -28,8 +29,8 @@ export function AuthScreen({ kind }: { kind: "register" | "login" }) {
         <select id="promotion" name="promotion" defaultValue="2026" className="auth-select">{promotions.map((p) => <option key={p} value={p}>{p === "Other" ? "Other / not listed" : p}</option>)}</select>
       </>}
       <label htmlFor="email">Email</label><input id="email" name="email" type="email" autoComplete="email" required placeholder="student@example.com" />
-      <label htmlFor="password">Password</label><input id="password" name="password" type="password" autoComplete={sign ? "new-password" : "current-password"} required minLength={sign ? 8 : 1} placeholder="Password" />
-      {sign && <><label htmlFor="confirmPassword">Confirm password</label><input id="confirmPassword" name="confirmPassword" type="password" autoComplete="new-password" required minLength={8} placeholder="Type your password again" /></>}
+      <label htmlFor="password">Password</label><PasswordInput id="password" name="password" autoComplete={sign ? "new-password" : "current-password"} required minLength={sign ? 8 : 1} placeholder="Password" />
+      {sign && <><label htmlFor="confirmPassword">Confirm password</label><PasswordInput id="confirmPassword" name="confirmPassword" autoComplete="new-password" required minLength={8} placeholder="Type your password again" /></>}
       {authError && <p className="auth-error" role="alert">{authError}</p>}
       {authMessage && <p className="auth-ok" role="status">{authMessage}</p>}
       {sign && <p className="confirm-note">📧 After you create your account, open the confirmation email and click the link. Then <b>come back to this page</b> and sign in with your email and password.</p>}

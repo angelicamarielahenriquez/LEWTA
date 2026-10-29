@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
 import { IMAGES } from "@/lib/assets";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { accessories, aliens, cities, cityDecks, cityName } from "@/lib/gameData";
 import type { TeacherRow } from "@/lib/teacher";
 
@@ -29,7 +30,7 @@ export function TeacherLoginScreen() {
     {!teacherAccessConfigured && <p className="auth-error">Teacher access is not configured on this server yet.</p>}
     {teacherAuthError && <p className="auth-error" role="alert">{teacherAuthError}</p>}
     <label htmlFor="teacher-password">Teacher password</label>
-    <input type="password" id="teacher-password" autoComplete="current-password" placeholder="Enter teacher password" value={password} onChange={(e) => setPassword(e.target.value)} />
+    <PasswordInput id="teacher-password" autoComplete="current-password" placeholder="Enter teacher password" value={password} onChange={(e) => setPassword(e.target.value)} />
     <button className="pink-action" disabled={!password.trim()}>Unlock Teacher Dashboard →</button>
     <button type="button" onClick={() => navigate("learn")}>‹ Back to LEWTA</button>
   </form>;
