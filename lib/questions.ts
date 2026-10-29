@@ -108,18 +108,19 @@ export function sentenceParts(pair: Pair): { before: string; target: string; aft
   return { before: hit.ex.slice(0, hit.start), target: hit.ex.slice(hit.start, hit.end), after: hit.ex.slice(hit.end) };
 }
 
-/** Which pairs each mission uses. Positions 1–10, 11–20, 21–30, 31–40 and all 80 for the Boss. */
+/** Which pairs each mission uses. Positions 1–10, 11–20, 21–30, 31–40, and 50 of the city's 80 words for the Boss. */
+export const BOSS_QUESTIONS = 50;
 export function buildRoundPairs(cityId: string, roundIndex: number, missedIds: number[], random: () => number = Math.random): Pair[] {
   const deck = cityDecks[cityId] || cityDecks["new-york"];
   const mode = roundInfo[roundIndex].mode;
   let pairs: Pair[];
   if (mode === "boss") {
     if (cityId === "new-york") {
-      // Keep 80 questions: the 11 curated prompts first, without repeating their answers.
+      // 50 questions: the 11 curated prompts first, then other city words (a new mix each time), never repeating an answer.
       const curated = new Set(newYorkBossPairs.map((p) => normalizeAnswer(p.b)));
       const retained = deck.filter((p) => !curated.has(normalizeAnswer(p.a)) && !curated.has(normalizeAnswer(p.b)));
-      pairs = [...newYorkBossPairs, ...retained.slice(0, 80 - newYorkBossPairs.length)];
-    } else pairs = deck.slice(0, 80);
+      pairs = [...newYorkBossPairs, ...shuffle(retained, random).slice(0, BOSS_QUESTIONS - newYorkBossPairs.length)];
+    } else pairs = shuffle(deck.slice(0, 80), random).slice(0, BOSS_QUESTIONS);
   } else if (mode === "review") {
     const base = deck.slice(30, 40);
     const missed = missedIds.map((id) => deck.find((p) => p.id === id)).filter((p): p is Pair => Boolean(p));

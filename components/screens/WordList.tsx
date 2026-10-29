@@ -22,7 +22,7 @@ export function WordList({ cityId, mission, onMission }: { cityId: string; missi
         <span className="wl-num">{i + 1}</span> {r.title}</button>)}
     </div>
     {mission === 3 && <p className="wl-note">☄️ Review Rush can also bring back up to 5 words from your Words to Revisit.</p>}
-    {mission === 4 && <p className="wl-note">🏆 The Business City Boss uses all the words of this city.</p>}
+    {mission === 4 && <p className="wl-note">🏆 The Business City Boss asks 50 questions chosen from all the words of this city.</p>}
     {mission === 4 && <input className="teacher-search wl-search" placeholder="Search a word…" value={query} onChange={(e) => setQuery(e.target.value)} aria-label="Search a word" />}
     <div className="wl-table">
       <div className="wl-head"><span>WORD</span><span>SYNONYM</span><span>SPANISH</span></div>

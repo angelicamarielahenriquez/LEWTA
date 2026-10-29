@@ -20,6 +20,6 @@ test("Business City Boss hints never reveal the answer, any choice, the hidden w
       }
     }
   }
-  assert.ok(total >= 12 * 80 * 3);
+  assert.ok(total >= 12 * 50 * 3);
   console.log("boss hint kinds", kinds);
 });

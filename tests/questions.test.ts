@@ -54,8 +54,12 @@ test("Context Match answers are short enough to type (one or two words)", () => 
   for (const c of playOrder) for (const p of buildRoundPairs(c, 2, [])) assert.ok(p.b.split(/\s+/).length <= 2, `${p.deckId}: ${p.b}`);
 });
 
-test("Business City Boss uses 80 questions; New York starts with the 11 curated ones", () => {
-  for (const c of playOrder) assert.equal(buildRoundPairs(c, 4, []).length, 80);
+test("Business City Boss uses 50 different questions from the city words; New York starts with the 11 curated ones", () => {
+  for (const c of playOrder) {
+    const pairs = buildRoundPairs(c, 4, []);
+    assert.equal(pairs.length, 50, c);
+    assert.equal(new Set(pairs.map((p) => p.id)).size, 50, `${c}: no repeated question`);
+  }
   const ny = buildRoundPairs("new-york", 4, []);
   assert.equal(ny.filter((p) => p.businessQuestion).length, 11);
   for (const p of ny.filter((x) => x.businessQuestion)) assert.equal(createQuestionOptions(p, cityDecks["new-york"]).filter((o) => o.correct).length, 1);
