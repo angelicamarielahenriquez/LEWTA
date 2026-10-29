@@ -161,3 +161,5 @@ button:disabled { cursor: not-allowed; }
 }
 .lw .lw-btn.landing-start, .lw .lw-btn.landing-comments { position: relative; left: auto; top: auto; width: 100%; height: auto; }
 .lw-exhaust i { width: 18px; height: 18px; background: radial-gradient(circle, #fff 0 25%, #ff9cc8 55%, #ff2e8300 75%); }
+.passport button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; }
+.passport-tip { font-size: 12px; color: #9fb3ff; margin: -4px 0 6px; }
