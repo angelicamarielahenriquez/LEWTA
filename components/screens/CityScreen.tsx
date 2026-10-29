@@ -1,5 +1,7 @@
 "use client";
 import Image from "next/image";
+import { useState } from "react";
+import { WordList } from "@/components/screens/WordList";
 import { useLewta } from "@/components/LewtaContext";
 import { cityIcon, missionImage } from "@/lib/assets";
 import { cityRewardAccessory, roundInfo } from "@/lib/gameData";
@@ -8,6 +10,8 @@ import { cityRewardAccessory, roundInfo } from "@/lib/gameData";
 export function CityScreen() {
   const { activeCity, roundDone, teacherPreviewMode, startGame, exitTeacherTest } = useLewta();
   const reward = cityRewardAccessory(activeCity.id);
+  const [studyMission, setStudyMission] = useState(0);
+  const study = (i: number) => { setStudyMission(i); document.getElementById("word-list")?.scrollIntoView({ behavior: "smooth", block: "start" }); };
   return <>
     {teacherPreviewMode && <div className="note teacher-test-note"><b>TEACHER TESTING MODE</b> · Student XP, gems and unlocks are not changed. <button className="btn ghost" onClick={exitTeacherTest}>Exit test</button></div>}
     <div className="hero">
@@ -22,8 +26,10 @@ export function CityScreen() {
         <Image className="mission-art" src={missionImage(i, done ? "completed" : open ? "continue" : "locked")} alt="" width={290} height={235} />
         <strong>{r.title}</strong>
         <button className="btn yellow" disabled={!open} onClick={() => startGame(i)}>{done ? "Play Again →" : open ? "START →" : "🔒 Locked"}</button>
+        <button className="study-link" onClick={() => study(i)}>📖 Study the words</button>
       </div>;
     })}</div>
+    <WordList key={activeCity.id} cityId={activeCity.id} mission={studyMission} onMission={setStudyMission} />
     <p className="note">Complete each mission to unlock the next. Finish all five to earn the {activeCity.name} stamp, a new alien{reward ? ` and the ${reward.name}` : ""}. {roundDone.length}/5 missions completed.</p>
   </>;
 }

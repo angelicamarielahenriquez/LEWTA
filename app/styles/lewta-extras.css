@@ -193,3 +193,32 @@ button:disabled { cursor: not-allowed; }
 .password-field .eye-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .password-field .eye-btn[aria-pressed="true"] { color: #ff2b97; }
 .teacher-login .password-field .eye-btn { display: grid; width: 40px; }
+
+/* ---------- Study the words (city page) ---------- */
+.study-link { margin-top: 8px; background: transparent; border: 0; color: #9fd8ff; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; padding: 6px; }
+.study-link:hover { color: #fff; }
+.word-list { margin-top: 26px; scroll-margin-top: 80px; }
+.word-list h2 { margin: 6px 0; }
+.word-list-tabs { flex-wrap: wrap; }
+.word-list-tabs button { cursor: pointer; min-width: 140px; }
+.wl-num { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #ffffff22; font-size: 12px; margin-right: 4px; }
+.wl-note { color: #ffe9a8; font-size: 14px; margin: 0 0 10px; }
+.wl-search { margin: 0 0 12px; }
+.wl-table { display: flex; flex-direction: column; }
+.wl-head, .wl-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 11px 6px; border-bottom: 1px solid #3c4f8c; align-items: center; }
+.wl-head { font-size: 12px; letter-spacing: 1px; color: #9fb3ff; font-weight: 900; }
+.wl-row b { color: #fff; }
+.wl-syn { color: #ff7ab8; font-weight: 800; }
+.wl-es { color: #c5d4ff; font-style: italic; }
+.wl-row:nth-child(odd) { background: #ffffff06; }
+
+/* ---------- Learn & Match / Speed Match on phones: two columns, compact tiles ---------- */
+@media (max-width: 700px) {
+  .demo-game .choices.match-board { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .match-col { gap: 8px; }
+  .match-board button { min-height: 52px; padding: 8px 6px; font-size: 14px; line-height: 1.15; border-radius: 13px; word-break: break-word; hyphens: auto; }
+  .word-list-tabs button { min-width: 0; flex: 1 1 45%; font-size: 13px; padding: 10px 6px; }
+  .wl-head, .wl-row { grid-template-columns: 1fr 1fr; font-size: 14px; }
+  .wl-head span:nth-child(3) { display: none; }
+  .wl-es { grid-column: 1 / -1; font-size: 13px; margin-top: -6px; }
+}
