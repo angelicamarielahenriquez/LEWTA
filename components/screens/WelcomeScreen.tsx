@@ -6,7 +6,7 @@ import { TPT_URL, YOUTUBE_URL } from "@/components/layout/TopBar";
 import { IMAGES } from "@/lib/assets";
 import { submitComment } from "@/lib/comments";
 
-/** V10 welcome: Teacher Angélica's landing picture with clickable areas. */
+/** Welcome screen rebuilt from the pieces of Teacher Angélica's Canva design: wide on computers, one column on phones. */
 export function WelcomeScreen() {
   const { go, musicTrack, chooseTrack, toggleMusic, audio } = useLewta();
   const [choicesOpen, setChoicesOpen] = useState(false);
@@ -24,16 +24,48 @@ export function WelcomeScreen() {
   }
 
   return <>
-    <div className="landing-wrap">
+    <div className="landing-wrap lw">
       <h1 className="sr-only">Welcome to LEWTA — Learning English with Teacher Angélica</h1>
-      <div className="landing-picture">
-        <Image src={IMAGES.backgrounds.landingScreen} alt="LEWTA welcome screen, Teacher Angelica and rocket" width={1920} height={1080} priority sizes="100vw" />
-        <a className="landing-hit landing-tpt" href={TPT_URL} target="_blank" rel="noopener noreferrer" aria-label="Teacher Angelica TPT store" />
-        <a className="landing-hit landing-youtube" href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" aria-label="Teacher Angelica YouTube channel" />
-        <button className="landing-hit landing-start" aria-label="Click here to start" onClick={() => setChoicesOpen(true)} />
-        <button className="landing-hit landing-comments" aria-label="Comments" onClick={() => { setStatus(""); setCommentsOpen(true); }} />
+      <header className="lw-top">
+        <div className="lw-social">
+          <a href={TPT_URL} target="_blank" rel="noopener noreferrer" aria-label="Teacher Angelica TPT store"><Image src="/images/landing/tpt.png" alt="TPT" width={212} height={57} /></a>
+          <span className="lw-divider" aria-hidden="true" />
+          <a href={YOUTUBE_URL} target="_blank" rel="noopener noreferrer" aria-label="Teacher Angelica YouTube channel"><Image src="/images/landing/youtube.png" alt="YouTube" width={185} height={47} /></a>
+        </div>
+        <Image className="lw-tagline" src="/images/landing/tagline.png" alt="Learn English with Teacher Angélica" width={524} height={43} />
         <button className="landing-sound" id="sound-toggle" onClick={() => (musicTrack === "lewta" ? toggleMusic() : chooseTrack("lewta"))} aria-label="Toggle background music">{playing ? "🔊 Music" : "🔇 Music"}</button>
-      </div>
+      </header>
+      <main className="lw-main">
+        <section className="lw-stage" aria-hidden="true">
+          <svg className="lw-orbits" viewBox="0 0 600 500" preserveAspectRatio="none">
+            <path d="M330 120 C 300 40, 180 50, 60 170" />
+            <path d="M120 420 C 260 470, 420 430, 540 330" />
+          </svg>
+          <Image className="lw-planet lw-p1" src="/images/landing/planet-ring.png" alt="" width={149} height={148} />
+          <Image className="lw-planet lw-p2" src="/images/backgrounds/planet-2.png" alt="" width={160} height={160} />
+          <Image className="lw-planet lw-p3" src="/images/landing/planet-stripes.png" alt="" width={156} height={152} />
+          <span className="lw-spark lw-s1" /><span className="lw-spark lw-s2" /><span className="lw-spark lw-s3" /><span className="lw-spark lw-s4 pink" />
+          <span className="lw-dot d1" /><span className="lw-dot d2" /><span className="lw-dot d3" /><span className="lw-dot d4" /><span className="lw-dot d5" />
+          <div className="lw-rocket">
+            <div className="lw-exhaust"><i /><i /><i /><i /><i /><i /></div>
+            <Image src={IMAGES.branding.lewtaLogo} alt="" width={1600} height={600} priority />
+          </div>
+          <div className="lw-clouds"><i /><i /><i /><i /><i /></div>
+        </section>
+        <section className="lw-side">
+          <div className="lw-card">
+            <div className="lw-portrait">
+              <span className="lw-spark lw-c1" /><span className="lw-spark lw-c2" /><span className="lw-spark lw-c3" /><span className="lw-dash" />
+              <Image src={IMAGES.branding.teacherAngelica} alt="Teacher Angélica" width={260} height={260} priority />
+            </div>
+            <h2>Hi, I’m <em>Teacher Angélica!</em></h2>
+            <p>I created LEWTA <em>(Learning English With Teacher Angélica)</em> to help you boost your English through fun games, interactive challenges, and TOEIC practice.</p>
+            <p className="lw-small">Get ready to learn, explore, and reach for the stars!</p>
+          </div>
+          <button className="lw-btn lw-start landing-start" onClick={() => setChoicesOpen(true)}><span className="lw-play" aria-hidden="true">▶</span>CLICK HERE TO START</button>
+          <button className="lw-btn lw-comments landing-comments" onClick={() => { setStatus(""); setCommentsOpen(true); }}>LET YOUR COMMENTS HERE</button>
+        </section>
+      </main>
       <div className={`landing-choices ${choicesOpen ? "open" : ""}`} id="landing-choices">
         <div className="landing-dialog" role="dialog" aria-modal="true" aria-label="Choose how to start">
           <button className="landing-close" onClick={() => setChoicesOpen(false)} aria-label="Close">✕</button>

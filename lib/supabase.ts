@@ -23,3 +23,19 @@ export const supabase = isSupabaseConfigured
       },
     })
   : null;
+
+/**
+ * Asks Supabase (public endpoint) whether "Sign in with Google" is switched on for this project.
+ * The Google button is only shown when it is, so students never see a button that fails.
+ */
+export async function isGoogleSignInEnabled(): Promise<boolean> {
+  if (!isSupabaseConfigured) return false;
+  try {
+    const r = await fetch(`${projectUrl}/auth/v1/settings`, { headers: { apikey: publishableKey }, cache: "no-store" });
+    if (!r.ok) return false;
+    const settings = (await r.json()) as { external?: { google?: boolean } };
+    return settings.external?.google === true;
+  } catch {
+    return false;
+  }
+}

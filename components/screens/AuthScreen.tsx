@@ -1,21 +1,25 @@
 "use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useLewta } from "@/components/LewtaContext";
 import { alienImage } from "@/lib/assets";
 import { promotions } from "@/lib/gameData";
-import { isSupabaseConfigured } from "@/lib/supabase";
+import { isGoogleSignInEnabled, isSupabaseConfigured } from "@/lib/supabase";
 
 /** V10 Create Account / Sign In card, connected to Supabase (email and Google). */
 export function AuthScreen({ kind }: { kind: "register" | "login" }) {
   const { register, login, loginWithGoogle, busy, authError, authMessage, go } = useLewta();
   const sign = kind === "register";
+  // The Google button appears only once Google sign-in is switched on in Supabase.
+  const [googleOn, setGoogleOn] = useState(false);
+  useEffect(() => { let alive = true; void isGoogleSignInEnabled().then((on) => { if (alive) setGoogleOn(on); }); return () => { alive = false; }; }, []);
   return <div className="form-page">
     <form className="auth" onSubmit={sign ? register : login}>
       <Image src={alienImage(sign ? "luna" : "ziggy")} alt="" width={110} height={110} />
       <h1>{sign ? "Create Your Account" : "Welcome Back, Explorer!"}</h1>
       <p>{sign ? "Join LEWTA and begin your English adventure." : "Sign in to continue your learning journey."}</p>
-      <button type="button" className="google-btn" onClick={loginWithGoogle} disabled={busy || !isSupabaseConfigured}><span className="google-g">G</span> Continue with Google</button>
-      <div className="auth-separator">or continue with email</div>
+      {googleOn && <><button type="button" className="google-btn" onClick={loginWithGoogle} disabled={busy || !isSupabaseConfigured}><span className="google-g">G</span> Continue with Google</button>
+      <div className="auth-separator">or continue with email</div></>}
       {sign && <>
         <label htmlFor="firstName">First name</label><input id="firstName" name="firstName" autoComplete="given-name" required placeholder="Your first name" />
         <label htmlFor="lastName">Last name</label><input id="lastName" name="lastName" autoComplete="family-name" required placeholder="Your last name" />
